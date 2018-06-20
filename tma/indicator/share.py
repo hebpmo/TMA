@@ -25,16 +25,20 @@ class ShareDayIndicator(object):
         self.kls = None  # 日k线
         self.tks = None  # 今日分笔
 
-    def _get_kls(self):
+    def _get_kls(self, use_exists=True):
         """获取日K线"""
-        if self.kls is not None:
-            kls = self.kls
+        if not use_exists:
+            self.kls = klines(self.code, freq='D')
+        if self.kls is None:
+            kls = self.kls = klines(self.code, freq='D')
         else:
-            kls = klines(self.code, freq='D')
-            self.kls = kls
+            kls = self.kls
         return kls
 
-    def _get_today_ticks(self):
+    def _get_today_ticks(self, use_exists=True):
+        """获取当日分笔"""
+        if not use_exists:
+            self.tks = ticks(self.code)
         if self.tks is None:
             tks = self.tks = ticks(self.code)
         else:
@@ -109,13 +113,27 @@ class ShareDayIndicator(object):
         BS_DIST['NEUTRAL_AMOUNT'] = int(res.get(2, 0))
         self.features.update(BS_DIST)
 
-    def run(self):
+    def update(self, target=('ma', 'lnd', 'bs')):
+        """更新个股指标"""
+        self._get_kls(use_exists=False)
+        self._get_today_ticks(use_exists=False)
+        self.run(target=target)
+
+    def run(self, target=('ma', 'lnd', 'bs')):
         """计算所有个股相关指标的主函数，
         继承ShareIndicator对象，重写run方法可以自由选择计算哪些指标
         """
-        self.cal_move_average()
-        self.cal_latest_nd()
-        self.cal_bs_dist()
+        funcs = {
+            "ma": self.cal_move_average,
+            "lnd": self.cal_latest_nd,
+            "bs": self.cal_bs_dist
+        }
+        for x in target:
+            if x in funcs.keys():
+                funcs[x]()
+            else:
+                raise ValueError('%s 不是合法的指标关键词' % x)
+
 
 
 class ShareWeekIndicator(object):

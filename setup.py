@@ -8,7 +8,7 @@ setup(
     name=tma.__name__,
     version=tma.__version__,
     keywords=(
-        "A股", "xueqiu", "雪球", "TuShare", "交易数据分析"
+        "A股", "xueqiu", "雪球", "TuShare", "交易数据分析", "三级股票池", "仿真交易"
     ),
     description="Tools for Market A - A股工具集",
     long_description="",

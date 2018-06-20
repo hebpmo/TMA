@@ -16,12 +16,18 @@ import json
 from tma import ACCOUNT_PATH
 from tma.collector import get_price
 
+
+class Order(object):
+    """订单对象"""
+    pass
+
+
 class Account:
     def __init__(self, name, fund=-1, mode="strict"):
         self.name = name
         self.mode = mode
         self.fund = fund
-        self.path = os.path.join(ACCOUNT_PATH, "%s_trade.json" % self.name)
+        self.path = os.path.join(ACCOUNT_PATH, "account_%s.json" % self.name)
         self._read_info()
 
     def _read_info(self):
@@ -37,7 +43,7 @@ class Account:
             }
 
     def _save_info(self):
-        json.dump(self.info, open(self.path, 'w'))
+        json.dump(self.info, open(self.path, 'w'), indent=2)
 
     def buy(self, code, amount, price=None):
         if not price:

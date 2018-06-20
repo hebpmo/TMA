@@ -40,15 +40,10 @@ class StockPool:
         self.level1 = {}
         self.level2 = {}
         self.level3 = {}
+        self._read_pool()
 
-        self._read_data()
-        self._tl = {
-            '1': self.level1,
-            '2': self.level2,
-            '3': self.level3,
-        }
 
-    def _read_data(self):
+    def _read_pool(self):
         """读入股票池文件"""
         path = self.path
         if not os.path.exists(path):
@@ -86,9 +81,9 @@ class StockPool:
         """
         try:
             _verify_share(share)
-            ft.write_file(self.path, str(share))
+            ft.write_file(self.path, str(share), mode='a')
             if read:
-                self._read_data()
+                self._read_pool()
         except Exception:
             traceback.print_exc()
 
@@ -96,7 +91,7 @@ class StockPool:
         """添加多只股票"""
         for share in shares:
             self.add(share, read=False)
-        self._read_data()
+        self._read_pool()
 
     def remove(self, code, level, save_to_hist=True):
         """指定股票代码，删除股票
@@ -116,7 +111,7 @@ class StockPool:
             ft.write_file(self.path, shares_keep, mode='w')
             if save_to_hist:
                 ft.write_file(self.path_hist, shares_keep, mode='a')
-            self._read_data()
+            self._read_pool()
         except Exception:
             traceback.print_exc()
 
@@ -128,4 +123,4 @@ class StockPool:
         shares = ft.read_file(self.path)
         ft.write_file(self.path_hist, shares, mode='a')
         ft.create_file(self.path, mode='w')
-        self._read_data()
+        self._read_pool()
