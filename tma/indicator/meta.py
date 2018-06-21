@@ -8,6 +8,7 @@ indicator.meta - 指标信息（元标签）
 from collections import OrderedDict
 
 # A股 Market 指标体系 - 日
+# 编码规则：M + 三位数字（001~999）
 # --------------------------------------------------------------------
 
 MARKET_INDICATOR_META = OrderedDict()
