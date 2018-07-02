@@ -27,11 +27,21 @@ def set_path(path=None):
 
 PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH = set_path()
 
+# 基本参数配置
+# --------------------------------------------------------------------
+SCKEY = None  # Server酱KEY
+EMAIL = {"user": None, "password": None, "service": None}
+DEBUG = True
+# 全局日志记录器
+from zb.tools.logger import create_logger
+logger = create_logger(name='tma', log_file=os.path.join(PATH, "tma.log"), cmd=True)
+
 
 # API - 列表
 # --------------------------------------------------------------------
 from .pool import StockPool
 from .account import Account
+
 
 
 # module介绍
