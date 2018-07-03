@@ -22,7 +22,9 @@ class ShareDayIndicator(object):
             "CODE": code,
             "PRICE": get_price(code)
         })
-        self.defalt_target = ('ma', 'lnd', 'bs', 'bsf')
+        self.kls = None
+        self.tks = None
+        self.default_target = ('ma', 'lnd', 'bs', 'bsf')
 
     def _get_kls(self, use_exists=True):
         """获取日K线"""
@@ -43,7 +45,7 @@ class ShareDayIndicator(object):
         else:
             tks = self.tks
         return tks
-    
+
     def _get_realtime_bar(self):
         """获取实时行情"""
         bar = self.bar = bars(self.code)
@@ -65,7 +67,7 @@ class ShareDayIndicator(object):
         })
         for k, v in MA.items():
             MA[k] = round(v, 4)
-        
+
         self.features.update(MA)
 
     def cal_latest_nd(self, d=None):
@@ -105,7 +107,7 @@ class ShareDayIndicator(object):
             if isinstance(v, tuple):
                 v = v[0]
             LND[k] = round(v, 4)
-        
+
         self.features.update(LND)
 
     def cal_bs_dist(self):
@@ -120,8 +122,7 @@ class ShareDayIndicator(object):
         BS_DIST['NEUTRAL_AMOUNT'] = int(res.get(2, 0))
 
         self.features.update(BS_DIST)
-    
-    
+
     def cal_bs_first(self):
         """计算买一、卖一挂单金额"""
         bar = self._get_realtime_bar().iloc[0]
@@ -132,20 +133,19 @@ class ShareDayIndicator(object):
             BS_FIRST['BUY_FIRST'] = 0
         else:
             BS_FIRST['BUY_FIRST'] = float(bar['b1_v']) * float(bar['b1_p']) * 100
-        
+
         # 买一总挂单金额
         if not bar['a1_v']:
             BS_FIRST['SELL_FIRST'] = 0
         else:
             BS_FIRST['SELL_FIRST'] = float(bar['a1_v']) * float(bar['a1_p']) * 100
-        
+
         self.features.update(BS_FIRST)
-    
 
     def update(self, target=None):
         """更新个股指标"""
         if not target:
-            target = self.defalt_target
+            target = self.default_target
         self._get_kls(use_exists=False)
         self._get_today_ticks(use_exists=False)
         self.run(target=target)
@@ -155,7 +155,7 @@ class ShareDayIndicator(object):
         继承ShareIndicator对象，重写run方法可以自由选择计算哪些指标
         """
         if not target:
-            target = self.defalt_target
+            target = self.default_target
         funcs = {
             "ma": self.cal_move_average,
             "lnd": self.cal_latest_nd,

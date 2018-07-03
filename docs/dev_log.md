@@ -20,6 +20,38 @@ sm_limit('600122', kind="zt", threshold=10000, interval=1)
 
 ```
 
+### 2 - A股交易日历
+
+A股交易日历引用自Tushare，另外自己实现了几个函数，使用案例如下：
+
+* 查看完整的交易日历
+```python
+from tma import trade_calendar
+print(trade_calendar)
+```
+
+* 获取某一个交易日前后N个交易日的日期
+``` python
+from tma import get_recent_trade_days
+
+after_10 = get_recent_trade_days("2018-07-03", 10)
+before_10 = get_recent_trade_days("2018-07-03", -10)
+```
+
+* 判断某一天是不是交易日
+``` python
+from tma import is_trade_day
+day = "2018-07-03"
+if is_trade_day(day):
+    print("%s 是交易日" % day)
+```
+
+* 判断当前是否是交易时间
+``` python
+from tma import is_in_trade_time
+if is_in_trade_time():
+    print("当前是交易时间")
+```
 
 
 
@@ -56,4 +88,7 @@ sm_limit('600122', kind="zt", threshold=10000, interval=1)
 * 添加全局日志记录器
 * 添加debug模式
 
+### 2018-07-03
+
+* 添加功能 - A股交易日历
 

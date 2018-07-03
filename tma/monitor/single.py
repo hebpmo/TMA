@@ -9,8 +9,6 @@ from tma import sms
 from tma import SCKEY
 from tma.utils import debug_print
 
-# "SCU10748T12f471f07094648d297222fc649e374d598bf38bc81fd"
-
 
 def sm_limit(code, kind, threshold=10000, interval=1):
     """监控单只股票 涨停板买一挂单金额 / 跌停板卖一挂单金额
@@ -73,3 +71,5 @@ def sm_limit(code, kind, threshold=10000, interval=1):
     end_info = "结束监控 - %s - %s | 参数配置：阈值（%i 万元）" \
                  % (msg0, str(code), threshold)
     debug_print(end_info)
+
+

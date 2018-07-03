@@ -3,18 +3,17 @@
 import tushare as ts
 from datetime import datetime
 
-
+# A股交易日历
+# --------------------------------------------------------------------
 
 trade_calendar = ts.trade_cal()  # tushare提供的交易日历
 
-def is_trade_day(date, trade_calendar=trade_calendar):
+def is_trade_day(date):
     """判断date日期是不是交易日
 
     :param date: str or datetime.date, 如 2018-03-15
-    :param trade_calendar: 交易日历
     :return: Bool
     """
-
     trade_day = trade_calendar[trade_calendar["isOpen"] == 1]
     trade_day_list = list(trade_day['calendarDate'])
     if isinstance(date, datetime):
@@ -56,6 +55,7 @@ def get_recent_trade_days(date, n=10):
         rtd = tcts[date_i+n:date_i+1]
     return rtd
 
+# --------------------------------------------------------------------
 
 def debug_print(msg, level="INFO"):
     from tma import DEBUG, logger
