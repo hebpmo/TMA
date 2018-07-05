@@ -29,7 +29,7 @@ PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH = set_path()
 
 # 基本参数配置
 # --------------------------------------------------------------------
-SCKEY = None  # Server酱KEY
+SCKEY = None  # Server酱KEY SCU10748T12f471f07094648d297222fc649e374d598bf38bc81fd
 EMAIL = {"user": None, "password": None, "service": None}
 DEBUG = True
 # 全局日志记录器

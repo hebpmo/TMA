@@ -28,8 +28,12 @@ def server_chan_push(title, content, sckey=None):
         从[Server酱](https://sc.ftqq.com/3.version)获取的key
     :return: None
     """
-    if not sckey and SCKEY:
-        sckey = SCKEY
+    if not sckey and not SCKEY:
+        raise ValueError("请配置SCKEY，如果还没有SCKEY，"
+                         "可以到这里申请一个：http://sc.ftqq.com/3.version")
+
+    # 优先使用系统内部配置的SCKEY
+    sckey = SCKEY if SCKEY else sckey
     url = 'https://sc.ftqq.com/%s.send' % sckey
     requests.post(url, data={'text': title, 'desp': content})
 

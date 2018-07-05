@@ -24,7 +24,16 @@ class ShareDayIndicator(object):
         })
         self.kls = None
         self.tks = None
+        self.bar = None
+        self.update_time = {"kls": None,
+                            'tks': None,
+                            "bar": None,
+                            "last_run": None}
         self.default_target = ('ma', 'lnd', 'bs', 'bsf')
+        self.basic_info()
+
+    # 相关数据获取
+    # --------------------------------------------------------------------
 
     def _get_kls(self, use_exists=True):
         """获取日K线"""
@@ -34,6 +43,7 @@ class ShareDayIndicator(object):
             kls = self.kls = klines(self.code, freq='D')
         else:
             kls = self.kls
+        self.update_time['kls'] = datetime.now().__str__()
         return kls
 
     def _get_today_ticks(self, use_exists=True):
@@ -44,16 +54,40 @@ class ShareDayIndicator(object):
             tks = self.tks = ticks(self.code)
         else:
             tks = self.tks
+        self.update_time['tks'] = datetime.now().__str__()
         return tks
 
     def _get_realtime_bar(self):
         """获取实时行情"""
         bar = self.bar = bars(self.code)
+        self.update_time['bar'] = datetime.now().__str__()
         return bar
 
-    def cal_move_average(self):
+    # --------------------------------------------------------------------
+
+    def basic_info(self):
+        bar = self._get_realtime_bar()
+        self.bar = bar.iloc[0]
+        open_price = float(bar.loc[0, 'open'])
+        high_price = float(bar.loc[0, 'high'])
+        low_price = float(bar.loc[0, 'low'])
+        cur_price = float(bar.loc[0, 'price'])
+
+        BASIC = OrderedDict()
+        BASIC['NAME'] = bar.loc[0, 'name']
+        BASIC['TOTAL_AMOUNT'] = float(bar.loc[0, 'amount'])
+        BASIC['CHANGE_RATE'] = (cur_price - open_price) / open_price
+        BASIC['WAVE_RATE'] = (high_price - low_price) / open_price
+
+        self.features.update(BASIC)
+
+
+    def cal_move_average(self, update=False):
         """计算移动均线指标"""
-        kls = self._get_kls()
+        if update or self.kls is None:
+            kls = self.kls = self._get_kls()
+        else:
+            kls = self.kls
         seq_close = kls['close']
         MA = OrderedDict()
         MA.update({
@@ -70,16 +104,20 @@ class ShareDayIndicator(object):
 
         self.features.update(MA)
 
-    def cal_latest_nd(self, d=None):
+    def cal_latest_nd(self, d=None, update=False):
         """计算最近N个交易日的相关指标
 
+        :param update:
         :param d: list, 默认 None
             指定N的大小，可以指定多个；如果为 None，则 d = [5, 10, 20, 40, 60]。
         :return:
         """
+        if update or self.kls is None:
+            kls = self.kls = self._get_kls()
+        else:
+            kls = self.kls
         if d is None:
             d = [5, 10, 20, 40, 60]
-        kls = self._get_kls()
         kls['wave'] = kls['high'] - kls['low']
         kls['wave_rate'] = kls['wave'] / kls['open']
         LND = OrderedDict()
@@ -110,9 +148,12 @@ class ShareDayIndicator(object):
 
         self.features.update(LND)
 
-    def cal_bs_dist(self):
+    def cal_bs_dist(self, update=False):
         """计算今日分笔的买卖盘分布"""
-        tks = self._get_today_ticks()
+        if update or self.tks is None:
+            tks = self.tks = self._get_today_ticks()
+        else:
+            tks = self.tks
         tks['amount'] = tks['price'] * tks['vol'] * 100
         res = dict(tks.groupby('type').sum()['amount'])
         BS_DIST = OrderedDict()
@@ -123,9 +164,13 @@ class ShareDayIndicator(object):
 
         self.features.update(BS_DIST)
 
-    def cal_bs_first(self):
+    def cal_bs_first(self, update):
         """计算买一、卖一挂单金额"""
-        bar = self._get_realtime_bar().iloc[0]
+        if update or self.bar is None:
+            bar = self._get_realtime_bar().iloc[0]
+        else:
+            bar = self.bar
+
         BS_FIRST = OrderedDict()
 
         # 卖一总挂单金额
@@ -146,11 +191,9 @@ class ShareDayIndicator(object):
         """更新个股指标"""
         if not target:
             target = self.default_target
-        self._get_kls(use_exists=False)
-        self._get_today_ticks(use_exists=False)
-        self.run(target=target)
+        self.run(target=target, update=True)
 
-    def run(self, target=None):
+    def run(self, target=None, update=False):
         """计算所有个股相关指标的主函数，
         继承ShareIndicator对象，重写run方法可以自由选择计算哪些指标
         """
@@ -164,9 +207,21 @@ class ShareDayIndicator(object):
         }
         for x in target:
             if x in funcs.keys():
-                funcs[x]()
+                funcs[x](update=update)
             else:
                 raise ValueError('%s 不是合法的指标关键词' % x)
+        # 记录最后一次运行的时间
+        self.update_time['last_run'] = datetime.now().__str__()
+
+    @property
+    def indicators(self):
+        indicators = OrderedDict()
+        for k, v in self.features.items():
+            if isinstance(v, float):
+                indicators[k] = round(v, 4)
+            else:
+                indicators[k] = v
+        return indicators
 
 
 
