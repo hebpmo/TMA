@@ -41,6 +41,7 @@ logger = create_logger(name='tma', log_file=os.path.join(PATH, "tma.log"), cmd=T
 # --------------------------------------------------------------------
 from .pool import StockPool
 from .account import Account
+from .rules import RULES
 
 from .utils import (trade_calendar, is_in_trade_time,
                     is_trade_day, get_recent_trade_days)
