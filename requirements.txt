@@ -1,6 +1,6 @@
 retrying
 numpy
-beautifulsoup4
+bs4
 tushare
 pandas
 requests
