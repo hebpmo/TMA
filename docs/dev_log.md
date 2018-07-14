@@ -100,6 +100,24 @@ if is_in_trade_time():
 
 * 使用股票代码作为股票查询的主键，不要使用股票中文名，因为股票除权等会临时改变股票名；
 
+## 版本更新记录
+> 所有功能的添加都是针对A股，没有考虑其他市场。
+
+### v 0.1.0
+* pub_date: 2018-07-15
+* 新增功能 - 三级股票池 - tma.pool.StockPool
+* 新增功能 - 虚拟仿真交易账户 - tma.account.Account
+* 新增功能 - tushare数据接口封装 - tma.collector.ts
+* 新增功能 - 获取上海证券交易所所有指数的实时行情 - tma.collector.sse.get_sh_indexes
+* 新增功能 - 新华网首页头条新闻采集 - tma.collector.xhn.HomePage
+* 新增功能 - 雪球数据采集：个股评论、热门组合 - tma.collector.xueqiu
+* 新增功能 - A股全市场单个交易日的指标体系 - tma.indicator.market.MarketIndicator
+* 新增功能 - 以日为更新周期的个股指标体系 - tma.indicator.market.ShareDayIndicator
+* 新增功能 - A股交易日历 - tma.utils.Calendar
+* 新增功能 - 预警消息推送：server酱、邮件发送 - tma.sms
+
+
+
 
 ## 开发笔记
 

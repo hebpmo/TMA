@@ -10,6 +10,7 @@ collector.sse - 采集上海证券交易所的数据
 import requests
 import pandas as pd
 
+
 def get_sh_indexes():
     """获取上海证券交易所所有指数的实时行情"""
     url = "http://www.sse.com.cn/js/common/indexQuotes.js"
@@ -37,6 +38,3 @@ def get_sh_indexes():
 
     # index_sh.astype()
     return index_sh
-
-
-

@@ -1,5 +1,3 @@
-# coding: utf-8
-
 """
 StockPool - 股票池对象
 ====================================================================
@@ -10,14 +8,15 @@ from zb.tools import file_tools as ft
 
 from tma import POOL_PATH
 
+
 def _verify_share(share):
     base = {
         "code": None,
         "name": None,
-        "level": None,   # 1, 2, 3
-        "date": None,    # 入选日期
+        "level": None,  # 1, 2, 3
+        "date": None,  # 入选日期
         "reason": None,  # 入选理由
-        "price": None    # 入选时的价格
+        "price": None  # 入选时的价格
     }
     try:
         assert share.keys() == base.keys(), \
@@ -41,7 +40,6 @@ class StockPool:
         self.level2 = {}
         self.level3 = {}
         self._read_pool()
-
 
     def _read_pool(self):
         """读入股票池文件"""

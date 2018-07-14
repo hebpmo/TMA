@@ -81,7 +81,6 @@ class ShareDayIndicator(object):
 
         self.features.update(BASIC)
 
-
     def cal_move_average(self, update=False):
         """计算移动均线指标"""
         if update or self.kls is None:
@@ -132,9 +131,9 @@ class ShareDayIndicator(object):
                 # 最低价
                 LND["LOW_" + str(i)] = l
                 # 涨跌幅
-                LND["CHANGE_" + str(i)] = (kls_d.iloc[i-1]['close']-o) / o,
+                LND["CHANGE_" + str(i)] = (kls_d.iloc[i - 1]['close'] - o) / o,
                 # 最大回撤
-                LND["MAX_DOWN_" + str(i)] = (kls_d.iloc[i-1]['close']-h) / h
+                LND["MAX_DOWN_" + str(i)] = (kls_d.iloc[i - 1]['close'] - h) / h
                 # 平均每日波动率
                 LND["WAVE_RATE_A" + str(i)] = np.mean(kls_d['wave_rate'])
                 # 累计波动率
@@ -224,9 +223,8 @@ class ShareDayIndicator(object):
         return indicators
 
 
-
 class ShareWeekIndicator(object):
     """以周为更新周期的个股指标体系"""
+
     def __init__(self):
         pass
-

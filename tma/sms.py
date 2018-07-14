@@ -50,9 +50,10 @@ class EmailSender:
     e = EmailSender('zeng_bin8888@163.com', pw=pw, service='163')
     e.send_email(to, subject, content, files)
     """
+
     def __init__(self, from_, pw, service='163'):
         self.from_ = from_  # 用于发送email的邮箱
-        self.pw = pw        # 发送email的邮箱密码
+        self.pw = pw  # 发送email的邮箱密码
 
         # 登录邮箱
         self.smtp = smtplib.SMTP()
@@ -64,7 +65,6 @@ class EmailSender:
         smtp = smtps[service]
         self.smtp.connect(smtp)
         self.smtp.login(self.from_, self.pw)
-
 
     def construct_msg(self, to, subject, content, files=None):
         """构造email信息
@@ -96,14 +96,12 @@ class EmailSender:
 
         return msg
 
-
     @retry(stop_max_attempt_number=6)
     def send_email(self, to, subject, content, files=None):
         """登录邮箱，发送msg到指定联系人"""
         smtp = self.smtp
         msg = EmailSender.construct_msg(self, to, subject, content, files=files)
         smtp.sendmail(self.from_, to, str(msg))
-
 
     def quit(self):
         smtp = self.smtp

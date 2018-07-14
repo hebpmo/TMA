@@ -77,8 +77,6 @@ RULES["R004"] = {
 }
 
 
-
-
 # --------------------------------------------------------------------
 
 class Rules:
@@ -101,4 +99,3 @@ class Rules:
     @property
     def amount(self):
         return len(self.rule_ids)
-

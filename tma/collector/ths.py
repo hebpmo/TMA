@@ -12,7 +12,6 @@ import requests
 from bs4 import BeautifulSoup
 
 
-
 def get_market_level():
     url = "http://q.10jqka.com.cn/"
     headers = {

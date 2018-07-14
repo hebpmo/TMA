@@ -1,3 +1,6 @@
+retrying
+numpy
+beautifulsoup4
 tushare
 pandas
 requests

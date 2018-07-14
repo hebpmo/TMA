@@ -10,6 +10,7 @@ from tma import sms
 from tma.utils import debug_print
 from tma import logger
 
+
 # 涨跌停板破板
 # --------------------------------------------------------------------
 
@@ -53,13 +54,13 @@ def sm_limit(code, kind, threshold=10000, interval=1):
             elif kind == "dt":
                 money = sdi.features['SELL_FIRST']
 
-            debug_info = "%s - %s - %s 万元" % (str(code), msg1, str(int(money/10000)))
+            debug_info = "%s - %s - %s 万元" % (str(code), msg1, str(int(money / 10000)))
             debug_print(debug_info)
 
             if money / 10000 < threshold:
                 title = "%s - %s 即将破板" % (msg0, str(code))
                 content = "%s: %s万元，低于阈值（%s万元）" % (msg1,
-                            str(int(money/10000)), str(threshold))
+                                                   str(int(money / 10000)), str(threshold))
                 sms.server_chan_push(title, content)
         except Exception as e:
             traceback.print_exc()
@@ -67,7 +68,7 @@ def sm_limit(code, kind, threshold=10000, interval=1):
             continue
 
     end_info = "结束监控 - %s - %s | 参数配置：阈值（%i 万元）" \
-                 % (msg0, str(code), threshold)
+               % (msg0, str(code), threshold)
     debug_print(end_info)
 
 
@@ -77,8 +78,10 @@ def sm_limit(code, kind, threshold=10000, interval=1):
 def get_shares_status(codes):
     raise NotImplementedError
 
+
 def get_market_status():
     raise NotImplementedError
+
 
 def fix_inform(codes, interval=1800):
     """交易时间段内，每隔一段时间播报一次市场状态和个股行情
@@ -113,9 +116,9 @@ def fix_inform(codes, interval=1800):
             si = share.indicators
             share_status = share_status_template.format(
                 code=si['CODE'], name=si['NAME'], price=si['PRICE'],
-                change_rate=str(round(si['CHANGE_RATE']*100, 4)) + "%",
-                wave_rate=str(round(si['WAVE_RATE']*100, 4)) + "%",
-                total_amount=str(int(si['TOTAL_AMOUNT']/10000))
+                change_rate=str(round(si['CHANGE_RATE'] * 100, 4)) + "%",
+                wave_rate=str(round(si['WAVE_RATE'] * 100, 4)) + "%",
+                total_amount=str(int(si['TOTAL_AMOUNT'] / 10000))
             )
             status.append(share_status)
 
@@ -125,7 +128,5 @@ def fix_inform(codes, interval=1800):
         time.sleep(interval)
 
     end_info = "结束 - 固定间隔播报 | 参数配置：个股列表（%s）、时间间隔（%s）" \
-                 % (str(codes), str(interval))
+               % (str(codes), str(interval))
     logger.info(end_info)
-
-

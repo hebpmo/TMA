@@ -8,6 +8,7 @@ from datetime import datetime
 
 trade_calendar = ts.trade_cal()  # tushare提供的交易日历
 
+
 def is_trade_day(date):
     """判断date日期是不是交易日
 
@@ -22,6 +23,7 @@ def is_trade_day(date):
         return True
     else:
         return False
+
 
 def is_in_trade_time():
     """判断当前是否是交易时间"""
@@ -41,6 +43,7 @@ def is_in_trade_time():
     else:
         return False
 
+
 def get_recent_trade_days(date, n=10):
     """返回date(含)之前(或之后)的 n个交易日日期"""
     assert is_trade_day(date), "输入的date必须是交易日"
@@ -50,10 +53,32 @@ def get_recent_trade_days(date, n=10):
     tcts = list(tct['calendarDate'])
     date_i = tcts.index(date)
     if n > 0:
-        rtd = tcts[date_i+1:date_i+n+1]
+        rtd = tcts[date_i + 1:date_i + n + 1]
     else:
-        rtd = tcts[date_i+n:date_i+1]
+        rtd = tcts[date_i + n:date_i + 1]
     return rtd
+
+
+class Calendar:
+    """A股交易日历"""
+
+    def __init__(self):
+        self.calendar = trade_calendar
+
+    @staticmethod
+    def is_trade_time():
+        return is_in_trade_time()
+
+    @staticmethod
+    def is_trade_day(date):
+        return is_trade_day(date)
+
+    @staticmethod
+    def recent_trade_days(n, date=None):
+        if date is None:
+            date = datetime.now().date().__str__()
+        return get_recent_trade_days(date, n)
+
 
 # --------------------------------------------------------------------
 

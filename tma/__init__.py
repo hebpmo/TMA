@@ -4,7 +4,7 @@ import os
 # 元信息
 # --------------------------------------------------------------------
 __name__ = 'tma'
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 __author__ = "zengbin"
 
 
@@ -25,17 +25,19 @@ def set_path(path=None):
             os.mkdir(P)
     return PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH
 
+
 PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH = set_path()
 
 # 基本参数配置
 # --------------------------------------------------------------------
-SCKEY = None  # Server酱KEY SCU10748T12f471f07094648d297222fc649e374d598bf38bc81fd
+SCKEY = None
 EMAIL = {"user": None, "password": None, "service": None}
 DEBUG = True
+
 # 全局日志记录器
 from zb.tools.logger import create_logger
-logger = create_logger(name='tma', log_file=os.path.join(PATH, "tma.log"), cmd=True)
 
+logger = create_logger(name='tma', log_file=os.path.join(PATH, "tma.log"), cmd=True)
 
 # API - 列表
 # --------------------------------------------------------------------
@@ -43,9 +45,9 @@ from .pool import StockPool
 from .account import Account
 from .rules import RULES
 
+from .utils import Calendar
 from .utils import (trade_calendar, is_in_trade_time,
                     is_trade_day, get_recent_trade_days)
-
 
 # module介绍
 # --------------------------------------------------------------------

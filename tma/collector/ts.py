@@ -50,7 +50,7 @@ def get_ticks(code, source="spider", date=None, cons=None):
     # 统一 ticks 的输出结果
     def _unify_out(ticks, date):
         ticks = ticks[['time', 'price', 'volume', 'type']]
-        ticks['datetime'] = ticks['time'].apply(lambda x: datetime.strptime(date+" "+x, "%Y-%m-%d %H:%M:%S"))
+        ticks['datetime'] = ticks['time'].apply(lambda x: datetime.strptime(date + " " + x, "%Y-%m-%d %H:%M:%S"))
         ticks['vol'] = ticks['volume']
         type_convert = {
             "买盘": 0,
@@ -76,11 +76,14 @@ def get_ticks(code, source="spider", date=None, cons=None):
         ticks = ts.tick(code=code, conn=cons, date=date)
     return ticks
 
+
 ticks = get_ticks
+
 
 def get_bars(codes):
     """获取codes的实时quotes"""
     return ts.get_realtime_quotes(codes)
+
 
 bars = get_bars
 
@@ -100,6 +103,7 @@ def get_klines(code, freq="D", start_date=None):
     else:
         data = ts.get_k_data(code=code, start=start_date, ktype=freq)
     return data
+
 
 klines = get_klines
 
@@ -177,8 +181,5 @@ def get_hist_market(date):
     hm['date'] = date
     return hm
 
+
 hist_market = get_hist_market
-
-
-
-

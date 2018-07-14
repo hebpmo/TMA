@@ -19,6 +19,7 @@ import re
 from datetime import datetime
 from bs4 import BeautifulSoup
 from zb.crawlers.utils import get_header
+import traceback
 
 home_url = "http://www.xinhuanet.com/"
 
@@ -95,6 +96,7 @@ def get_article_detail(article_url):
 
 class HomePage(object):
     """新华网首页"""
+
     def __init__(self):
         self.home_url = "http://www.xinhuanet.com/"
 
@@ -120,7 +122,7 @@ class HomePage(object):
                 d = self._get_date_from_url(url)
                 a_list.append([url, title, d])
             except:
-                continue
+                traceback.print_exc()
 
         a_list = [a for a in a_list if
                   a[0] != ""
@@ -154,9 +156,8 @@ class HomePage(object):
             try:
                 article = get_article_detail(a)
                 articles.append(article)
-            except Exception:
-                # print("文章内容获取失败：", a)
-                continue
+            except:
+                traceback.print_exc()
         return articles
 
 
@@ -166,9 +167,3 @@ class Fortune(object):
         self.url2 = "http://www.xinhuanet.com/fortune/caiyan.htm"
         self.url3 = "http://www.xinhuanet.com/fortune/cfx.htm"
         self.url4 = "http://www.xinhuanet.com/fortune/bcxc.htm"
-
-
-
-
-
-

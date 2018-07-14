@@ -19,11 +19,6 @@ SHARE_INDICATOR_META = OrderedDict({
     ],
 })
 
-
-
-
-
-
 # A股 Market 指标体系 - 日
 # 编码规则：M + 三位数字（001~999）
 # --------------------------------------------------------------------
@@ -121,6 +116,3 @@ def check_indicator_meta(indicator=None):
     """查询 indicator 的元信息"""
     if indicator.startswith("M"):
         return MARKET_INDICATOR_META.get(indicator, None)
-
-
-
