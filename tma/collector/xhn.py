@@ -20,6 +20,9 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 from zb.crawlers.utils import get_header
 import traceback
+import pandas as pd
+
+import tma
 
 home_url = "http://www.xinhuanet.com/"
 
@@ -122,7 +125,9 @@ class HomePage(object):
                 d = self._get_date_from_url(url)
                 a_list.append([url, title, d])
             except:
-                traceback.print_exc()
+                if tma.DEBUG:
+                    traceback.print_exc()
+                continue
 
         a_list = [a for a in a_list if
                   a[0] != ""
@@ -134,7 +139,12 @@ class HomePage(object):
                   and 'photo' not in a[0]
                   and 'video' not in a[0]
                   ]
-        return a_list
+
+        # 根据url去重
+        df = pd.DataFrame(a_list, columns=['url', 'title', 'date'])
+        df.drop_duplicates('url', inplace=True)
+        res = [list(x) for x in list(df.values)]
+        return res
 
     def get_articles(self, d=None):
         """获取首页文章内容
@@ -157,7 +167,9 @@ class HomePage(object):
                 article = get_article_detail(a)
                 articles.append(article)
             except:
-                traceback.print_exc()
+                if tma.DEBUG:
+                    traceback.print_exc()
+                continue
         return articles
 
 

@@ -32,7 +32,7 @@ PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH = set_path()
 # --------------------------------------------------------------------
 SCKEY = None
 EMAIL = {"user": None, "password": None, "service": None}
-DEBUG = True
+DEBUG = False
 
 # 全局日志记录器
 from zb.tools.logger import create_logger

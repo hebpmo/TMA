@@ -5,10 +5,12 @@ Tushare数据接口封装
 ====================================================================
 """
 
-import tushare as ts
+import os
+import time
 from datetime import datetime
-import time, os
+
 import pandas as pd
+import tushare as ts
 
 from tma import DATA_PATH
 
@@ -131,7 +133,7 @@ def filter_st(tm):
     return tm1
 
 
-def get_today_market(filters=['tp'], save=True,
+def get_today_market(filters=None, save=True,
                      use_latest=False, interval=600):
     """返回最近一个交易日所有股票的交易数据
 
@@ -148,6 +150,8 @@ def get_today_market(filters=['tp'], save=True,
     :return: pd.DataFrame
         最新的市场行情
     """
+    if filters is None:
+        filters = ['tp']
     tm_csv = os.path.join(DATA_PATH, 'latest_market.csv')
     if use_latest and os.path.exists(tm_csv) \
             and time.time() - os.path.getmtime(tm_csv) < interval:

@@ -1,12 +1,23 @@
 # -*- coding: UTF-8 -*-
 
+import os
+import time
 import tushare as ts
+import pandas as pd
 from datetime import datetime
+
+from tma import DATA_PATH
 
 # A股交易日历
 # --------------------------------------------------------------------
 
-trade_calendar = ts.trade_cal()  # tushare提供的交易日历
+FILE_CALENDAR = os.path.join(DATA_PATH, 'calendar.csv')
+if os.path.exists(FILE_CALENDAR) and \
+        time.time() - os.path.getmtime(FILE_CALENDAR) < 3600 * 24:
+    trade_calendar = pd.read_csv(FILE_CALENDAR, encoding='utf-8')
+else:
+    trade_calendar = ts.trade_cal()  # tushare提供的交易日历
+    trade_calendar.to_csv(FILE_CALENDAR, index=False, encoding='utf-8')
 
 
 def is_trade_day(date):
@@ -45,18 +56,31 @@ def is_in_trade_time():
 
 
 def get_recent_trade_days(date, n=10):
-    """返回date(含)之前(或之后)的 n个交易日日期"""
-    assert is_trade_day(date), "输入的date必须是交易日"
-    tc = ts.trade_cal()
-    tct = tc[tc['isOpen'] == 1]
-    tct.reset_index(drop=True, inplace=True)
-    tcts = list(tct['calendarDate'])
-    date_i = tcts.index(date)
-    if n > 0:
-        rtd = tcts[date_i + 1:date_i + n + 1]
+    """返回任一日期date前后的n个交易日日期
+
+    :param n: int
+        返回交易日的数量n。
+        如果 n > 0，则返回date日期未来的n个交易日日期；
+        如果 n < 0，则返回date日期过去的n个交易日日期。
+    :param date: str  默认值 today
+    :return: list
+        n个交易日日期列表
+    """
+    cal_date = list(trade_calendar['calendarDate'])
+    date_index = cal_date.index(date)
+    if n >= 0:
+        recent_days = cal_date[date_index:date_index + n + 20]
     else:
-        rtd = tcts[date_i + n:date_i + 1]
-    return rtd
+        recent_days = cal_date[date_index + n - 20:date_index + 1]
+        recent_days = recent_days[::-1]
+
+    res = []
+    for d in recent_days:
+        if is_trade_day(d):
+            res.append(d)
+        if len(res) == abs(n):
+            break
+    return res
 
 
 class Calendar:
@@ -77,7 +101,7 @@ class Calendar:
     def recent_trade_days(n, date=None):
         if date is None:
             date = datetime.now().date().__str__()
-        return get_recent_trade_days(date, n)
+        return get_recent_trade_days(date=date, n=n)
 
 
 # --------------------------------------------------------------------
