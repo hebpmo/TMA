@@ -8,14 +8,9 @@
 
 
 ### 安装、卸载、更新
-
----
-
-安装 - `pip install tma`
-
-卸载 - `pip uninstall tma`
-
-更新 - `pip install --upgrade tma`
+* 安装 - `pip install tma`
+* 卸载 - `pip uninstall tma`
+* 更新 - `pip install --upgrade tma`
 
 ### 监控（涨停/跌停）板（买一/卖一）挂单金额
 
@@ -105,11 +100,27 @@ recent_days = ['2018-07-15', '2018-07-14', '2018-07-13']
 articles = hp.get_articles(recent_days)
 ```
 
+### 获取上海证券交易所的上证系列指数行情
+上证系列指数包含214个指数，共有为10个类别，分别是：定制指数、风格指数、成份指数、
+主题指数、债券指数、策略指数、重点指数、基金指数、综合指数、行业指数。
+
+关于上证系列指数的相关信息，请点击查看：
+* [上证系列指数列表](http://www.sse.com.cn/market/sseindex/indexlist/)
+* [上证系列指数计算与维护细则](http://www.sse.com.cn/market/sseindex/calculation/c/sse_indices_cal_and_main_cn.pdf)
+
+上证系列指数行情获取方法如下：
+```python
+from tma.collector import get_sh_indexes
+
+sh_indexes = get_sh_indexes()
+```
+
+
 ## 版本更新记录
 > 所有功能的添加都是针对A股，没有考虑其他市场。
 
 ### v 0.1.0
----
+
 * pub_date: 2018-07-15
 * 新增功能 - 三级股票池 - tma.pool.StockPool
 * 新增功能 - 虚拟仿真交易账户 - tma.account.Account
