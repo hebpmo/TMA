@@ -122,21 +122,15 @@ sh_indexes = get_sh_indexes()
 ### v 0.1.0
 
 * pub_date: 2018-07-15
-* 新增功能 - 三级股票池 - tma.pool.StockPool
-* 新增功能 - 虚拟仿真交易账户 - tma.account.Account
-* 新增功能 - tushare数据接口封装 - tma.collector.ts
-* 新增功能 - 获取上海证券交易所所有指数的实时行情 - tma.collector.sse.get_sh_indexes
-* 新增功能 - 新华网首页头条新闻采集 - tma.collector.xhn.HomePage
-* 新增功能 - 雪球数据采集：个股评论、热门组合 - tma.collector.xueqiu
-* 新增功能 - A股全市场单个交易日的指标体系 - tma.indicator.market.MarketIndicator
-* 新增功能 - 以日为更新周期的个股指标体系 - tma.indicator.market.ShareDayIndicator
-* 新增功能 - A股交易日历 - tma.utils.Calendar
-* 新增功能 - 预警消息推送：server酱、邮件发送 - tma.sms
-* 新增功能 - 监控单只股票 涨停板买一挂单金额 / 跌停板卖一挂单金额 - tma.monitor.single.sm_limit
-
-
-
-
-
-
+* 新增功能 - 三级股票池 - `tma.pool.StockPool`
+* 新增功能 - 虚拟仿真交易账户 - `tma.account.Account`
+* 新增功能 - tushare数据接口封装 - `tma.collector.ts`
+* 新增功能 - 获取上海证券交易所所有指数的实时行情 - `tma.collector.sse.get_sh_indexes`
+* 新增功能 - 新华网首页头条新闻采集 - `tma.collector.xhn.HomePage`
+* 新增功能 - 雪球数据采集：个股评论、热门组合 - `tma.collector.xueqiu`
+* 新增功能 - A股全市场单个交易日的指标体系 - `tma.indicator.market.MarketIndicator`
+* 新增功能 - 以日为更新周期的个股指标体系 - `tma.indicator.market.ShareDayIndicator`
+* 新增功能 - A股交易日历 - `tma.utils.Calendar`
+* 新增功能 - 预警消息推送：server酱、邮件发送 - `tma.sms`
+* 新增功能 - 监控单只股票 涨停板买一挂单金额 / 跌停板卖一挂单金额 - `tma.monitor.single.sm_limit`
 

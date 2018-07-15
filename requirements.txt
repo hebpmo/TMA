@@ -1,3 +1,4 @@
+tqdm
 retrying
 numpy
 bs4
