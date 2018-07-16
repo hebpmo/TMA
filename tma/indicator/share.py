@@ -30,7 +30,7 @@ class ShareDayIndicator(object):
                             "bar": None,
                             "last_run": None}
         self.default_target = ('ma', 'lnd', 'bs', 'bsf')
-        self.basic_info()
+        # self.basic_info()
 
     # 相关数据获取
     # --------------------------------------------------------------------
@@ -68,7 +68,8 @@ class ShareDayIndicator(object):
     def basic_info(self):
         bar = self._get_realtime_bar()
         self.bar = bar.iloc[0]
-        open_price = float(bar.loc[0, 'open'])
+        pre_close = float(bar.loc[0, 'pre_close'])
+        # open_price = float(bar.loc[0, 'open'])
         high_price = float(bar.loc[0, 'high'])
         low_price = float(bar.loc[0, 'low'])
         cur_price = float(bar.loc[0, 'price'])
@@ -76,8 +77,8 @@ class ShareDayIndicator(object):
         BASIC = OrderedDict()
         BASIC['NAME'] = bar.loc[0, 'name']
         BASIC['TOTAL_AMOUNT'] = float(bar.loc[0, 'amount'])
-        BASIC['CHANGE_RATE'] = (cur_price - open_price) / open_price
-        BASIC['WAVE_RATE'] = (high_price - low_price) / open_price
+        BASIC['CHANGE_RATE'] = (cur_price - pre_close) / pre_close
+        BASIC['WAVE_RATE'] = (high_price - low_price) / pre_close
 
         self.features.update(BASIC)
 
@@ -196,6 +197,7 @@ class ShareDayIndicator(object):
         """计算所有个股相关指标的主函数，
         继承ShareIndicator对象，重写run方法可以自由选择计算哪些指标
         """
+        self.basic_info()
         if not target:
             target = self.default_target
         funcs = {
