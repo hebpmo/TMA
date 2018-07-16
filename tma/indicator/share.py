@@ -19,8 +19,7 @@ class ShareDayIndicator(object):
         self.code = code
         self.features = OrderedDict({
             "DATE": datetime.now().date().__str__(),
-            "CODE": code,
-            "PRICE": get_price(code)
+            "CODE": code
         })
         self.kls = None
         self.tks = None
@@ -76,10 +75,10 @@ class ShareDayIndicator(object):
 
         BASIC = OrderedDict()
         BASIC['NAME'] = bar.loc[0, 'name']
+        BASIC["PRICE"] = cur_price
         BASIC['TOTAL_AMOUNT'] = float(bar.loc[0, 'amount'])
         BASIC['CHANGE_RATE'] = (cur_price - pre_close) / pre_close
         BASIC['WAVE_RATE'] = (high_price - low_price) / pre_close
-
         self.features.update(BASIC)
 
     def cal_move_average(self, update=False):
