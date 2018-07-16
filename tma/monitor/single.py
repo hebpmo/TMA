@@ -92,6 +92,8 @@ def fix_inform(codes, interval=1800):
         固定间隔时间，单位：秒
     :return: None
     """
+    if not is_in_trade_time():
+        return
     if isinstance(codes, str):
         codes = [codes]
 
@@ -100,7 +102,6 @@ def fix_inform(codes, interval=1800):
     logger.info(start_info)
 
     shares = [ShareDayIndicator(code) for code in codes]
-
     share_status_template = "### {code}（{name}）\n --- \n" \
                             " 当前价格为{price}元，" \
                             "涨跌幅{change_rate}，振幅{wave_rate}，" \
