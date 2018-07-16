@@ -15,12 +15,30 @@ class BaseRank:
         self.name = name
         self.desc = desc
 
+    def rank(self, top=None):
+        raise NotImplementedError
+
+    @property
+    def top30(self):
+        return self.rank(top=30)
+
+    @property
+    def top50(self):
+        return self.rank(top=50)
+
+    @property
+    def top100(self):
+        return self.rank(top=100)
+
 
 class WeekTop(BaseRank):
     """
 
     排序准则：周涨幅 * 0.5 + 周振幅 * 0.5
+
+    TODO: 优化 - 剔除上市不到30天的新股
     """
+
     def __init__(self, date, refresh=False):
         desc = "以涨幅和振幅为依据的周排序方法"
         super().__init__(name='week_top', desc=desc)
@@ -39,7 +57,8 @@ class WeekTop(BaseRank):
         latest_mkls["change_rate"] = latest_mkls["change"] / latest_mkls["open"]
         latest_mkls["wave"] = latest_mkls["high"] - latest_mkls['low']
         latest_mkls["wave_rate"] = latest_mkls["wave"] / latest_mkls["low"]
-        latest_mkls['criterion'] = 0.5 * latest_mkls["change_rate"] + 0.5 * latest_mkls["wave_rate"]
+        latest_mkls['criterion'] = 0.5 * latest_mkls["change_rate"] + \
+                                   0.5 * latest_mkls["wave_rate"]
         latest_mkls.drop(['open', 'close', 'high', 'low',
                           'volume', 'change', 'wave', ], axis=1, inplace=True)
         latest_mkls.sort_values('criterion', ascending=False, inplace=True)
@@ -53,18 +72,5 @@ class WeekTop(BaseRank):
             indexes = range(top)
             top_shares = list(self.latest_mkls.loc[indexes, 'code'])
         return list(enumerate(top_shares, 1))
-
-    @property
-    def top30(self):
-        return self.rank(top=30)
-
-    @property
-    def top50(self):
-        return self.rank(top=50)
-
-    @property
-    def top100(self):
-        return self.rank(top=100)
-
 
 
