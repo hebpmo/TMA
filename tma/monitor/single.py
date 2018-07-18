@@ -9,6 +9,7 @@ from tma.utils import is_in_trade_time
 from tma import sms
 from tma.utils import debug_print
 from tma import logger
+from tma.monitor.market import get_market_status
 
 
 # 涨跌停板破板
@@ -79,10 +80,6 @@ def get_shares_status(codes):
     raise NotImplementedError
 
 
-def get_market_status():
-    raise NotImplementedError
-
-
 def fix_inform(codes, interval=1800):
     """交易时间段内，每隔一段时间播报一次市场状态和个股行情
 
@@ -103,14 +100,16 @@ def fix_inform(codes, interval=1800):
 
     shares = [ShareDayIndicator(code) for code in codes]
     share_status_template = "### {code}（{name}）\n --- \n" \
-                            " 当前价格为{price}元，" \
-                            "涨跌幅{change_rate}，振幅{wave_rate}，" \
-                            "总成交金额{total_amount}万元。\n"
+                            "* 当前价格为{price}元\n" \
+                            "* 涨跌幅{change_rate}\n" \
+                            "* 振幅{wave_rate}\n" \
+                            "* 总成交金额{total_amount}万元\n\n"
 
     while is_in_trade_time():
         status = []
         # 构造播报信息 - 市场
-
+        market_status = get_market_status()
+        status.append(market_status)
         # 构造播报信息 - 个股
         for share in shares:
             share.update(target=['bsf'])
