@@ -118,7 +118,7 @@ class StockPool:
         :param code: str
             股票代码
         :param level: int
-            对应的股票等级
+            对应的股票等级，可选值 [1, 2, 3]
         :return: None
         """
         shares_l = self.shares['level'+str(level)]
