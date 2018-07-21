@@ -9,6 +9,8 @@ collector.xueqiu - 采集雪球数据
 
 import requests
 import time
+import json
+from collections import OrderedDict
 from bs4 import BeautifulSoup
 import webbrowser
 from zb.crawlers.utils import get_header
@@ -38,6 +40,40 @@ def open_xueqiu(code):
     webbrowser.open(url)
 
 
+def get_raw_response(raw):
+    """从浏览器访问雪球的原始请求中获取数据
+
+    :param raw: str
+        从浏览器复制的访问雪球的原始请求，包含cookies等信息，如：
+        raw =
+            GET /stock/screener/screen.json?category=SH&exchange=&areacode=&indcode=&orderby=symbol&order=desc&current=ALL&pct=ALL&page=1&mc=0_30&eps.20180331=0.2_6.77&_=1532157090470 HTTP/1.1
+            Host: xueqiu.com
+            Connection: keep-alive
+            Accept: application/json, text/javascript, */*; q=0.01
+            cache-control: no-cache
+            DNT: 1
+            X-Requested-With: XMLHttpRequest
+            User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36
+            Referer: https://xueqiu.com/hq/screener
+            Accept-Encoding: gzip, deflate, br
+            Accept-Language: en-US,en;q=0.9
+            Cookie: device_id=93f4ed2cb55c692c95f053da19015b52; s=fq11y14kj3; bid=e0902c871217c79df259eb5d83f46eae_j950845q; _ga=GA1.2.1448042712.1508812875; __utmz=1.1527436687.45.17.utmcsr=sogou.com|utmccn=(referral)|utmcmd=referral|utmcct=/link; __utma=1.1448042712.1508812875.1528039186.1529730232.49; remember=1; remember.sig=K4F3faYzmVuqC0iXIERCQf55g2Y; xq_a_token=6ff26751fa685eb1ceab508fcb1c6b0556ef650a; xq_a_token.sig=wSoXzThiLbzH4mXexFY2U11fUzM; xq_r_token=5a288141cd3742deacc30e09eda6d0de65501ced; xq_r_token.sig=Hp0vJJ_CRQXm_3ATbMMnyspaIBA; xq_is_login=1; xq_is_login.sig=J3LxgPVPUzbBg3Kee_PquUfih7Q; u=3987902339; u.sig=wHo1L73HiVC2HlUxrHqBNa63rVo; aliyungf_tc=AQAAAO0MKVFvPwIAyD88OjvS/B9ge3BR; Hm_lvt_1db88642e346389874251b5a1eded6e3=1531897634,1531985157,1532156465,1532157061; Hm_lpvt_1db88642e346389874251b5a1eded6e3=1532157061
+
+    :return: response requests.Response
+        原始请求对应返还的数据
+    """
+    raw_req = raw.strip("\n").split("\n")
+    raw_req = [r.strip(" ") for r in raw_req]
+    raw_req = [r for r in raw_req if r != ""]
+    headers = dict()
+    for r in raw_req[1:]:
+        k, v = r.split(": ")
+        headers[k] = v
+    url = "https://" + headers['Host'] + raw_req[0].split(" ")[1]
+    response = requests.get(url, headers=headers)
+    return response
+
+
 def get_comments(code, sleep=1):
     """获取股票code的雪球评论
 
@@ -59,8 +95,8 @@ def get_comments(code, sleep=1):
                   'source=user&sort=time&page={page}&_={real_time}'
     url = comment_url.format(symbol=symbol, page=1, real_time=real_time)
     res = sess.get(url, headers=headers, timeout=10).json()
-    count = res['count']            # 评论总条数
-    total_page = res['maxPage']     # 页数
+    count = res['count']  # 评论总条数
+    total_page = res['maxPage']  # 页数
     print("总页数：", total_page)
     # 评论数据存储list
     comments = {
@@ -68,7 +104,7 @@ def get_comments(code, sleep=1):
         "count": count,
     }
     coms = []
-    for i in range(1, total_page+1):
+    for i in range(1, total_page + 1):
         print(i)
         time.sleep(sleep)
         headers = get_header()
@@ -188,8 +224,8 @@ def get_top_portfolio(market='cn', profit="monthly_gain", count=30):
             "follower_count": r['follower_count'],
             "updated_at": r['updated_at'],
             "net_value": r['net_value'],
-            "monthly_gain": str(r['monthly_gain'])+"%",
-            "total_gain": str(r['annualized_gain_rate'])+"%",
+            "monthly_gain": str(r['monthly_gain']) + "%",
+            "total_gain": str(r['annualized_gain_rate']) + "%",
             "last_rb_id": r['last_rb_id'],
         }
 
@@ -211,4 +247,39 @@ def get_top_portfolio(market='cn', profit="monthly_gain", count=30):
     return top_pfs
 
 
+# 股票筛选
+# --------------------------------------------------------------------
 
+class ShareScreen:
+    def __init__(self):
+        self.name = "雪球股票筛选器"
+        self.screened = OrderedDict()
+
+    @staticmethod
+    def _get_shares(raw, reason):
+        res = get_raw_response(raw)
+        shares = json.loads(res.text)
+        shares['list'] = [i['symbol'][2:] for i in shares['list']]
+        shares['reason'] = reason
+        return shares
+
+    def SS01(self):
+        """选股器01 - 总市值低于30亿，每股收益大于0.2"""
+        reason = "总市值低于30亿，每股收益大于0.2"
+        raw = """
+        GET /stock/screener/screen.json?category=SH&exchange=&areacode=&indcode=&orderby=symbol&order=desc&current=ALL&pct=ALL&page=1&mc=0_30&eps.20180331=0.2_6.77&_=1532157090470 HTTP/1.1
+        Host: xueqiu.com
+        Connection: keep-alive
+        Accept: application/json, text/javascript, */*; q=0.01
+        cache-control: no-cache
+        DNT: 1
+        X-Requested-With: XMLHttpRequest
+        User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36
+        Referer: https://xueqiu.com/hq/screener
+        Accept-Encoding: gzip, deflate, br
+        Accept-Language: en-US,en;q=0.9
+        Cookie: device_id=93f4ed2cb55c692c95f053da19015b52; s=fq11y14kj3; bid=e0902c871217c79df259eb5d83f46eae_j950845q; _ga=GA1.2.1448042712.1508812875; __utmz=1.1527436687.45.17.utmcsr=sogou.com|utmccn=(referral)|utmcmd=referral|utmcct=/link; __utma=1.1448042712.1508812875.1528039186.1529730232.49; remember=1; remember.sig=K4F3faYzmVuqC0iXIERCQf55g2Y; xq_a_token=6ff26751fa685eb1ceab508fcb1c6b0556ef650a; xq_a_token.sig=wSoXzThiLbzH4mXexFY2U11fUzM; xq_r_token=5a288141cd3742deacc30e09eda6d0de65501ced; xq_r_token.sig=Hp0vJJ_CRQXm_3ATbMMnyspaIBA; xq_is_login=1; xq_is_login.sig=J3LxgPVPUzbBg3Kee_PquUfih7Q; u=3987902339; u.sig=wHo1L73HiVC2HlUxrHqBNa63rVo; aliyungf_tc=AQAAAO0MKVFvPwIAyD88OjvS/B9ge3BR; Hm_lvt_1db88642e346389874251b5a1eded6e3=1531897634,1531985157,1532156465,1532157061; Hm_lpvt_1db88642e346389874251b5a1eded6e3=1532157061
+        """
+        shares = self._get_shares(raw=raw, reason=reason)
+        self.screened['SS01'] = shares
+        return shares

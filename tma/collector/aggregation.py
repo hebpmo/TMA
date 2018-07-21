@@ -11,12 +11,11 @@ from tqdm import tqdm
 import pandas as pd
 
 import tma
+# tma.DEBUG = True
 from tma.utils import debug_print
 from tma.collector.ts import get_klines
 from tma.collector.ts import get_market_basic
 
-
-# tma.DEBUG = True
 
 def agg_market_klines(k_freq="D", refresh=True, cache=True):
     """获取整个市场全部股票的K线
