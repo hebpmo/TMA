@@ -36,7 +36,7 @@ class StockPool:
     # --------------------------------------------------------------------
     def save(self):
         """把股票池中的股票保存到文件"""
-        with open(self.path, 'w') as f:
+        with open(self.path, 'w', encoding='utf-8') as f:
             json.dump(self.shares, f, indent=2)
 
     def save_hist(self, shares):
@@ -47,7 +47,7 @@ class StockPool:
 
     def restore(self):
         """从文件中恢复股票池"""
-        with open(self.path, 'r') as f:
+        with open(self.path, 'r', encoding='utf-8') as f:
             self.shares = json.load(f)
 
     def restore_hist(self):
