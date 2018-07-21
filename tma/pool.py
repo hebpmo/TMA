@@ -4,121 +4,149 @@ StockPool - 股票池对象
 """
 import os
 import traceback
-from zb.tools import file_tools as ft
+from datetime import datetime
+from collections import OrderedDict
+import json
 
 from tma import POOL_PATH
 
 
-def _verify_share(share):
-    base = {
-        "code": None,
-        "name": None,
-        "level": None,  # 1, 2, 3
-        "date": None,  # 入选日期
-        "reason": None,  # 入选理由
-        "price": None  # 入选时的价格
-    }
-    try:
-        assert share.keys() == base.keys(), \
-            "share中应当包含这些key：%s" % str(base.keys())
-        assert share['level'] in [1, 2, 3], \
-            "level取值必须是[1, 2, 3]中的一个，当前值：%s" % str(share['level'])
-        return True
-    except:
-        return False
-
-
 class StockPool:
-    def __init__(self, name):
+    def __init__(self, name, pool_path=None):
         self.name = name
-
-        # 股票池保存路径, 以.pool为后缀
-        self.path = os.path.join(POOL_PATH, '%s.pool' % self.name)
-        self.path_hist = self.path.replace(".pool", "_hist.pool")
-
-        self.level1 = {}
-        self.level2 = {}
-        self.level3 = {}
-        self._read_pool()
-
-    def _read_pool(self):
-        """读入股票池文件"""
-        path = self.path
-        if not os.path.exists(path):
-            ft.create_file(path)
-            ft.create_file(self.path_hist)
+        if pool_path is None:
+            self.pool_path = POOL_PATH
         else:
-            self.level1 = {}
-            self.level2 = {}
-            self.level3 = {}
-            shares = [eval(share.strip('\n')) for share in ft.read_file(path)]
-            for share in shares:
-                if share['level'] == '1':
-                    if share['code'] not in self.level1.keys():
-                        self.level1[share['code']] = []
-                    self.level1[share['code']].append(share)
+            self.pool_path = pool_path
 
-                elif share['level'] == '2':
-                    if share['code'] not in self.level2.keys():
-                        self.level2[share['code']] = []
-                    self.level2[share['code']].append(share)
+        # 三级股票池缓存文件
+        self.path = os.path.join(self.pool_path, '%s_pool.json'
+                                 % self.name)
+        self.path_hist = self.path.replace(".json", "_hist.pool")
 
-                elif share['level'] == '3':
-                    if share['code'] not in self.level3.keys():
-                        self.level3[share['code']] = []
-                    self.level3[share['code']].append(share)
+        self.shares = OrderedDict(
+            level1=[],
+            level2=[],
+            level3=[]
+        )
 
-                else:
-                    print("error: ", share)
+        self.shares_hist = None
 
-    def add(self, share, read=True):
-        """添加单只股票
+    # 三级股票池的保存与恢复
+    # --------------------------------------------------------------------
+    def save(self):
+        """把股票池中的股票保存到文件"""
+        with open(self.path, 'w') as f:
+            json.dump(self.shares, f, indent=2)
 
-        每只股票可以多个入选理由，因此存在多条记录。
+    def save_hist(self, shares):
+        """删除股票池中股票的同时，保存一份到对应的hist文件"""
+        shares = [str(dict(share)) + "\n" for share in shares]
+        with open(self.path_hist, 'a', encoding='utf-8') as f:
+            f.writelines(shares)
 
+    def restore(self):
+        """从文件中恢复股票池"""
+        with open(self.path, 'r') as f:
+            self.shares = json.load(f)
+
+    def restore_hist(self):
+        with open(self.path_hist, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        self.shares_hist = [eval(x) for x in lines]
+
+    # 添加股票
+    # --------------------------------------------------------------------
+    def add(self, code, reason, level, dt=None):
+        """添加单只股票到股票池
+
+        Note: 每只股票可以多个入选理由，因此存在多条记录。
+
+        :param code: str
+            股票代码
+        :param reason: str
+            选股逻辑
+        :param level: int
+            加入股票池的等级，可选值 [1, 2, 3]
+        :param dt: str 默认值 datetime.now()
+            加入股票池的时间
+        :return: None
         """
-        try:
-            _verify_share(share)
-            ft.write_file(self.path, str(share), mode='a')
-            if read:
-                self._read_pool()
-        except Exception:
-            traceback.print_exc()
+        if dt is None:
+            dt = datetime.now().__str__().split(".")[0]
+        share = OrderedDict()
+        share['code'] = code
+        share['dt'] = dt
+        share['level'] = level
+        share['reason'] = reason
+        self.shares["level" + str(level)].append(share)
+        self.save()
 
-    def add_many(self, shares):
-        """添加多只股票"""
-        for share in shares:
-            self.add(share, read=False)
-        self._read_pool()
+    def add_many(self, codes, reason, level, dt=None):
+        """添加多只股票到股票池
 
-    def remove(self, code, level, save_to_hist=True):
-        """指定股票代码，删除股票
+        Note: 每只股票可以多个入选理由，因此存在多条记录。
 
-        不管该股票有多少条记录，都会一次性全部删除
-
+        :param codes: str or list
+            股票代码
+        :param reason: str
+            选股逻辑
+        :param level: int
+            加入股票池的等级，可选值 [1, 2, 3]
+        :param dt: str 默认值 datetime.now()
+            加入股票池的时间
+        :return: None
         """
-        try:
-            shares = [eval(share.strip('\n')) for share in ft.read_file(self.path)]
-            shares_keep = []
-            shares_hist = []
-            for share in shares:
-                if share['code'] == code and share['level'] == level:
-                    shares_hist.append(share)
-                else:
-                    shares_keep.append(share)
-            ft.write_file(self.path, shares_keep, mode='w')
-            if save_to_hist:
-                ft.write_file(self.path_hist, shares_keep, mode='a')
-            self._read_pool()
-        except Exception:
-            traceback.print_exc()
+        if dt is None:
+            dt = datetime.now().__str__().split(".")[0]
+        if isinstance(codes, str):
+            codes = [codes]
+        for code in codes:
+            share = OrderedDict()
+            share['code'] = code
+            share['dt'] = dt
+            share['level'] = level
+            share['reason'] = reason
+            self.shares["level" + str(level)].append(share)
+        self.save()
 
-    def delete(self, code, level):
-        self.remove(code=code, level=level, save_to_hist=False)
+    # 删除股票
+    # --------------------------------------------------------------------
+    def remove(self, code, level):
+        """删除指定等级的股票
 
-    def empty(self):
-        """清空股票池"""
-        shares = ft.read_file(self.path)
-        ft.write_file(self.path_hist, shares, mode='a')
-        ft.create_file(self.path, mode='w')
-        self._read_pool()
+        :param code: str
+            股票代码
+        :param level: int
+            对应的股票等级
+        :return: None
+        """
+        shares_l = self.shares['level'+str(level)]
+        removed = [share for share in shares_l if share['code'] == code]
+        self.save_hist(removed)
+        shares_l = [share for share in shares_l if share['code'] != code]
+        self.shares['level' + str(level)] = shares_l
+        self.save()
+
+    def empty(self, clear=True):
+        """清空三级股票池
+
+        Note: 默认会同时将股票池对应的json文件清空，谨慎操作！
+
+        :param clear: bool 默认值 True
+            是否同时清空对应的json文件
+        :return: None
+        """
+        shares = self.shares['level1']
+        shares.extend(self.shares['level2'])
+        shares.extend(self.shares['level3'])
+        self.save_hist(shares)
+
+        self.shares = OrderedDict(
+            level1=[],
+            level2=[],
+            level3=[]
+        )
+        if clear:
+            self.save()
+
