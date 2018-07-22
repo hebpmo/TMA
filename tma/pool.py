@@ -37,7 +37,7 @@ class StockPool:
     def save(self):
         """把股票池中的股票保存到文件"""
         with open(self.path, 'w', encoding='utf-8') as f:
-            json.dump(self.shares, f, indent=2)
+            json.dump(self.shares, f, indent=2, ensure_ascii=False)
 
     def save_hist(self, shares):
         """删除股票池中股票的同时，保存一份到对应的hist文件"""
@@ -48,7 +48,7 @@ class StockPool:
     def restore(self):
         """从文件中恢复股票池"""
         with open(self.path, 'r', encoding='utf-8') as f:
-            self.shares = json.load(f)
+            self.shares = OrderedDict(json.load(f))
 
     def restore_hist(self):
         with open(self.path_hist, 'r', encoding='utf-8') as f:
@@ -74,7 +74,7 @@ class StockPool:
         """
         if dt is None:
             dt = datetime.now().__str__().split(".")[0]
-        share = OrderedDict()
+        share = dict()
         share['code'] = code
         share['dt'] = dt
         share['level'] = level
@@ -102,7 +102,7 @@ class StockPool:
         if isinstance(codes, str):
             codes = [codes]
         for code in codes:
-            share = OrderedDict()
+            share = dict()
             share['code'] = code
             share['dt'] = dt
             share['level'] = level
