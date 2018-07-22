@@ -15,9 +15,28 @@ import tushare as ts
 from tma import DATA_PATH
 
 
-def get_market_basic():
+def get_market_basic(cache=True, use_cache=False):
     """返回A股所有股票的基础信息"""
-    return ts.get_stock_basics()
+    FILE_BASIC = os.path.join(DATA_PATH, "market_basic.csv")
+
+    if os.path.exists(FILE_BASIC):
+        now_t = time.time()
+        modify_t = os.path.getmtime(FILE_BASIC)
+        if use_cache and now_t - modify_t < 3600*12:
+            basic_df = pd.read_csv(FILE_BASIC, dtype={"code": str})
+            return basic_df
+    
+    basic_df = ts.get_stock_basics()
+    basic_df.reset_index(inplace=True)
+    basic_df['code'] = basic_df['code'].astype(str)
+    if cache:
+        basic_df.to_csv(FILE_BASIC, encoding='utf-8', index=False)
+    return basic_df
+
+def get_all_codes():
+    """返回A股所有股票的代码"""
+    basic_df = get_market_basic(cache=True, use_cache=True)
+    return list(basic_df['code'])
 
 
 def index_all():

@@ -250,7 +250,7 @@ def get_top_portfolio(market='cn', profit="monthly_gain", count=30):
 # 股票筛选
 # --------------------------------------------------------------------
 
-class ShareScreen:
+class XueQiuShareScreen:
     def __init__(self):
         self.name = "雪球股票筛选器"
         self.screened = OrderedDict()
@@ -283,3 +283,6 @@ class ShareScreen:
         shares = self._get_shares(raw=raw, reason=reason)
         self.screened['SS01'] = shares
         return shares
+
+    def SS02(self):
+        """选股器02 - 总市值低于30亿，每股收益大于0.2"""
