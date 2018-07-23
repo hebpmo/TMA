@@ -5,6 +5,7 @@ __pycache__/
 
 test/*
 .idea/*
+.vscode/*
 app_*.py
 */*.log
 

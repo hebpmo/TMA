@@ -93,6 +93,9 @@ class MaShareScreen(object):
                 screened.append(share)
         self.screened.extend(screened)
         
+class zb_list(list):
+    def print_i(self, i):
+        print(self.__getitem__(i))
 
     
 

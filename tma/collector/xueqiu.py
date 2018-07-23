@@ -283,6 +283,3 @@ class XueQiuShareScreen:
         shares = self._get_shares(raw=raw, reason=reason)
         self.screened['SS01'] = shares
         return shares
-
-    def SS02(self):
-        """选股器02 - 总市值低于30亿，每股收益大于0.2"""
