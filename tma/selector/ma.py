@@ -59,7 +59,6 @@ class MaShareScreen(object):
             'MA120_D', 'MA240_D'
         ]]
         self.shares_ma = [dict(row[1]) for row in sdis_df.iterrows()]
-    
 
     def SS01(self):
         """Share Screen 01 - 1号选股，当前价格向下偏离MA5_D超过10个点"""
@@ -81,7 +80,21 @@ class MaShareScreen(object):
                 share['reason'] = reason
                 screened.append(share)
         self.screened.extend(screened)
+    
+    def SS03(self):
+        """Share Screen 03 - 3号选股，日K线完全空头排列（MA120_D > MA60_D > MA30_D > MA20_D > MA10_D > MA5_D）"""
+        reason = "日K线完全空头排列（MA120_D > MA60_D > MA30_D > MA20_D > MA10_D > MA5_D）"
+        screened = []
+        for share in self.shares_ma:
+            condition = share['MA120_D'] > share['MA60_D'] > share['MA30_D'] \
+                        > share['MA20_D'] > share['MA10_D'] > share['MA5_D']
+            if condition:
+                share['reason'] = reason
+                screened.append(share)
+        self.screened.extend(screened)
         
+
+    
 
     
 
