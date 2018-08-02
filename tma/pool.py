@@ -201,7 +201,7 @@ class StockPool:
             "total_nums": total_nums,
             "up_rate": round(up_nums/total_nums, 4)
         }
-
+    
 
 
 

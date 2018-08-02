@@ -38,6 +38,26 @@ def server_chan_push(title, content, sckey=None):
     requests.post(url, data={'text': title, 'desp': content})
 
 
+@retry(stop_max_attempt_number=6)
+def bear_push(title, content, send_key=None):
+    """使用PushBear推送消息给所有订阅者微信，关于PushBear，
+    请参考：https://pushbear.ftqq.com/admin/#/
+
+    :param title: str
+        消息标题
+    :param content: str
+        消息内容，最长64Kb，可空，支持MarkDown
+    :param send_key: str
+        从[PushBear](https://pushbear.ftqq.com/admin/#/)获取的通道send_key
+    :return: None
+    """
+    if not send_key:
+        raise ValueError("请配置通道send_key，如果还没有，"
+                         "可以到这里创建通道获取：https://pushbear.ftqq.com/admin/#/")
+    api = "https://pushbear.ftqq.com/sub"
+    requests.post(api, data={'text': title, 'desp': content, "sendkey": send_key})
+
+
 class EmailSender:
     """
     example

@@ -163,7 +163,7 @@ class ShareDayIndicator(object):
 
         self.features.update(BS_DIST)
 
-    def cal_bs_first(self, update):
+    def cal_bs_first(self, update=True):
         """计算买一、卖一挂单金额"""
         if update or self.bar is None:
             bar = self._get_realtime_bar().iloc[0]
