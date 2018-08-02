@@ -5,7 +5,7 @@
 """
 
 from tma.indicator import MarketIndicator
-from tma import is_in_trade_time
+from tma.utils import is_in_trade_time
 
 
 def get_market_status():

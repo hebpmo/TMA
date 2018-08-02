@@ -37,17 +37,21 @@ DEBUG = False
 # 全局日志记录器
 from zb.tools.logger import create_logger
 
-logger = create_logger(name='tma', log_file=os.path.join(PATH, "tma.log"), cmd=True)
+log_file = os.path.join(PATH, "tma.log")
+logger = create_logger(log_file, name='tma', cmd=True)
 
 # API - 列表
 # --------------------------------------------------------------------
-from .pool import StockPool
-from .account import Account
-from .rules import RULES
-
-from .utils import Calendar
-from .utils import (trade_calendar, is_in_trade_time,
-                    is_trade_day, get_recent_trade_days)
+from tma.pool import StockPool
+from tma.account import Account
+from tma.rules import RULES
+from tma import selector
+from tma import monitor
+from tma import analyst
+from tma import indicator
+from tma.utils import Calendar
+from tma.utils import (trade_calendar, is_in_trade_time,
+                       is_trade_day, get_recent_trade_days)
 
 # module介绍
 # --------------------------------------------------------------------

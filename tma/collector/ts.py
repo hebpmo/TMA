@@ -14,6 +14,7 @@ import tushare as ts
 
 from tma import DATA_PATH
 
+# --------------------------------------------------------------------
 
 def get_market_basic(cache=True, use_cache=False):
     """返回A股所有股票的基础信息"""
@@ -38,6 +39,7 @@ def get_all_codes():
     basic_df = get_market_basic(cache=True, use_cache=True)
     return list(basic_df['code'])
 
+# --------------------------------------------------------------------
 
 def index_all():
     """指数行情接口"""
@@ -108,6 +110,8 @@ def get_bars(codes):
 
 bars = get_bars
 
+# K线
+# --------------------------------------------------------------------
 
 def get_klines(code, freq="D", start_date=None):
     """获取K线数据
@@ -128,6 +132,8 @@ def get_klines(code, freq="D", start_date=None):
 
 klines = get_klines
 
+# 全市场行情
+# --------------------------------------------------------------------
 
 def filter_tp(tm):
     """停盘股过滤
@@ -206,3 +212,10 @@ def get_hist_market(date):
 
 
 hist_market = get_hist_market
+
+# 融资融券
+# --------------------------------------------------------------------
+# tushare接口： sh_margins | sh_margin_details 
+#              sz_margins | sz_margin_details
+
+
