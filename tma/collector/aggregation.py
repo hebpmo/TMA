@@ -42,7 +42,7 @@ def agg_market_klines(k_freq="D", refresh=True, cache=True):
     shares = get_all_codes()
     shares_kls = []
     failed = []
-    for share in tqdm(shares):
+    for share in tqdm(shares, ncols=100, desc="agg_market_klines_%s" % k_freq):
         try:
             kls = get_klines(share, freq=k_freq)
             shares_kls.append(kls)
