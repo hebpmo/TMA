@@ -31,15 +31,19 @@ class BaseRank:
         return self.rank(top=100)
 
 
-class WeekTop(BaseRank):
+class WeekRank(BaseRank):
     """
-
     排序准则：周涨幅 * 0.5 + 周振幅 * 0.5
-
-    TODO: 优化 - 剔除上市不到30天的新股
     """
 
     def __init__(self, date, refresh=False):
+        """周排序
+
+        :param date: str
+            每周最后一个交易日的日期，如："2018-08-03"
+        :param refresh: bool 默认值 False
+            是否刷新数据
+        """
         desc = "以涨幅和振幅为依据的周排序方法"
         super().__init__(name='week_top', desc=desc)
         # 参数
@@ -65,7 +69,9 @@ class WeekTop(BaseRank):
         self.latest_mkls = latest_mkls.reset_index(drop=True)
 
     def rank(self, top=None):
-        self.data_prepare()
+        """默认的排序，即 周涨幅 * 0.5 + 周振幅 * 0.5"""
+        if not self.latest_mkls:
+            self.data_prepare()
         if top is None:
             top_shares = list(self.latest_mkls['code'])
         else:
@@ -73,4 +79,12 @@ class WeekTop(BaseRank):
             top_shares = list(self.latest_mkls.loc[indexes, 'code'])
         return list(enumerate(top_shares, 1))
 
+    def rank_by_change_rate(self):
+        """以周涨跌幅为依据的排序"""
+        if not self.latest_mkls:
+            self.data_prepare()
+        wr = self.latest_mkls
+        wr.sort_values('change_rate', ascending=False, inplace=True)
+        wr = wr.reset_index(drop=True)
+        return wr
 
