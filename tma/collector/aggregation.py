@@ -14,7 +14,7 @@ import tma
 # tma.DEBUG = True
 from tma.utils import debug_print
 from tma.collector.ts import get_klines
-from tma.collector.ts import get_market_basic
+from tma.collector.ts import get_all_codes
 
 
 def agg_market_klines(k_freq="D", refresh=True, cache=True):
@@ -39,7 +39,7 @@ def agg_market_klines(k_freq="D", refresh=True, cache=True):
         df = pd.read_csv(FILE_CACHE, encoding='utf-8', dtype={"code": str})
         return df
 
-    shares = list(get_market_basic().index)
+    shares = get_all_codes()
     shares_kls = []
     failed = []
     for share in tqdm(shares):

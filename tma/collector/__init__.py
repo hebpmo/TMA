@@ -15,4 +15,6 @@ from .ts import (klines, bars, ticks, today_market, get_price)
 # 上海证券交易所官网采集数据接口
 from .sse import get_sh_indexes
 
+from .aggregation import agg_market_klines
+
 
