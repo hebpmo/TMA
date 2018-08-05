@@ -12,7 +12,7 @@ from tma.collector import today_market
 from tma.indicator.meta import check_indicator_meta
 
 
-class MarketIndicator(object):
+class MarketDayIndicator(object):
     """A股全市场单个交易日的指标体系"""
     def __init__(self):
         self.features = OrderedDict()
