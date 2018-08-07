@@ -30,12 +30,10 @@ PATH, DATA_PATH, ACCOUNT_PATH, POOL_PATH = set_path()
 
 # 基本参数配置
 # --------------------------------------------------------------------
-SCKEY = None
-EMAIL = {"user": None, "password": None, "service": None}
 DEBUG = False
 
 # 全局日志记录器
-from zb.tools.logger import create_logger
+from zb.utils import create_logger
 
 log_file = os.path.join(PATH, "tma.log")
 logger = create_logger(log_file, name='tma', cmd=True)

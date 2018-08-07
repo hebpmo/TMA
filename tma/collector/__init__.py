@@ -10,7 +10,8 @@ collector - 数据采集模块
 
 
 # tushare数据接口封装
-from .ts import (klines, bars, ticks, today_market, get_price)
+from .ts import (klines, bars, ticks, today_market,
+                 get_price, get_indices)
 
 # 上海证券交易所官网采集数据接口
 from .sse import get_sh_indexes

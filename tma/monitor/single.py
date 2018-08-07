@@ -10,6 +10,7 @@ from tma import sms
 from tma.utils import debug_print
 from tma import logger
 from tma.monitor.market import get_market_status
+from tma.monitor.market import get_indices_status
 
 
 # 涨跌停板破板
@@ -77,16 +78,36 @@ def sm_limit(code, kind, threshold=10000, interval=1):
 # --------------------------------------------------------------------
 
 def get_shares_status(codes):
-    raise NotImplementedError
+    shares = [ShareDayIndicator(code) for code in codes]
+    share_status_template = "### {code}（{name}）\n --- \n" \
+                            "* 当前价格为{price}元\n" \
+                            "* 涨跌幅{change_rate}\n" \
+                            "* 振幅{wave_rate}\n" \
+                            "* 总成交金额{total_amount}万元\n\n"
+    shares_status = []
+    for share in shares:
+        share.update(target=['bsf'])
+        si = share.indicators
+        share_status = share_status_template.format(
+            code=si['CODE'], name=si['NAME'], price=si['PRICE'],
+            change_rate=str(round(si['CHANGE_RATE'] * 100, 4)) + "%",
+            wave_rate=str(round(si['WAVE_RATE'] * 100, 4)) + "%",
+            total_amount=str(int(si['TOTAL_AMOUNT'] / 10000))
+        )
+        shares_status.append(share_status)
+
+    return "".join(shares_status)
 
 
-def fix_inform(codes, interval=1800):
+def fix_inform(codes, interval=1800, key=None):
     """交易时间段内，每隔一段时间播报一次市场状态和个股行情
 
     :param codes: list or str
         个股代码
     :param interval: int
         固定间隔时间，单位：秒
+    :param key: str
+        推送微信消息服务所需要的key
     :return: None
     """
     if not is_in_trade_time():
@@ -98,33 +119,23 @@ def fix_inform(codes, interval=1800):
                  % (str(codes), str(interval))
     logger.info(start_info)
 
-    shares = [ShareDayIndicator(code) for code in codes]
-    share_status_template = "### {code}（{name}）\n --- \n" \
-                            "* 当前价格为{price}元\n" \
-                            "* 涨跌幅{change_rate}\n" \
-                            "* 振幅{wave_rate}\n" \
-                            "* 总成交金额{total_amount}万元\n\n"
-
     while is_in_trade_time():
         status = []
         # 构造播报信息 - 市场
         market_status = get_market_status()
         status.append(market_status)
+
+        # 构造播报信息 - 指数
+        indices_status = get_indices_status()
+        status.append(indices_status)
+
         # 构造播报信息 - 个股
-        for share in shares:
-            share.update(target=['bsf'])
-            si = share.indicators
-            share_status = share_status_template.format(
-                code=si['CODE'], name=si['NAME'], price=si['PRICE'],
-                change_rate=str(round(si['CHANGE_RATE'] * 100, 4)) + "%",
-                wave_rate=str(round(si['WAVE_RATE'] * 100, 4)) + "%",
-                total_amount=str(int(si['TOTAL_AMOUNT'] / 10000))
-            )
-            status.append(share_status)
+        share_status = get_shares_status(codes)
+        status.append(share_status)
 
         title = "市场状态播报 - %s" % datetime.now().__str__().split('.')[0]
         content = ''.join(status)
-        sms.server_chan_push(title, content)
+        sms.server_chan_push(title, content, key=key)
         time.sleep(interval)
 
     end_info = "结束 - 固定间隔播报 | 参数配置：个股列表（%s）、时间间隔（%s）" \
