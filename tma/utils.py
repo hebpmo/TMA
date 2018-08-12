@@ -5,6 +5,7 @@ import time
 import tushare as ts
 import pandas as pd
 from datetime import datetime
+from zb.tools import pdf
 
 from tma import DATA_PATH
 
@@ -115,3 +116,8 @@ def debug_print(msg, level="INFO"):
     }
     if DEBUG:
         LOGS[level](msg)
+
+
+# 提取pdf中的文本
+# --------------------------------------------------------------------
+pdf2text = pdf.pdf2text

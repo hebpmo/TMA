@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: UTF-8 -*-
 
 """
 collector.xhn - 新华网数据采集
