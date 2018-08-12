@@ -2,8 +2,10 @@
 
 import os
 import time
+import functools
 import tushare as ts
 import pandas as pd
+import warnings
 from datetime import datetime
 from zb.tools import pdf
 
@@ -106,7 +108,6 @@ class Calendar:
 
 
 # --------------------------------------------------------------------
-
 def debug_print(msg, level="INFO"):
     from tma import DEBUG, logger
     LOGS = {
@@ -116,6 +117,38 @@ def debug_print(msg, level="INFO"):
     }
     if DEBUG:
         LOGS[level](msg)
+
+
+# 装饰器：交易时间段运行函数
+# --------------------------------------------------------------------
+def run_at_trade_time(func):
+    """控制函数func仅在交易时间段运行"""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kw):
+        if is_in_trade_time():
+            res = func(*args, **kw)
+        else:
+            msg = "%s 不是交易时间，函数 %s 仅在交易时间执行" % (
+                datetime.now().__str__(), func.__name__
+            )
+            warnings.warn(msg)
+            res = None
+        return res
+
+    return wrapper
+
+
+# 股票代码校验
+# --------------------------------------------------------------------
+def code_verify(code):
+    """股票代码校验"""
+    if len(code) != 6:
+        return False, "股票代码长度为6，请检查"
+    s = code[0]
+    if s not in ["6", '3', '0']:
+        return False, "A股代码必须以6/3/0开头，请检查"
+    return True, '代码正确'
 
 
 # 提取pdf中的文本

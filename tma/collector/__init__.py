@@ -18,4 +18,5 @@ from .sse import get_sh_indexes
 
 from .aggregation import agg_market_klines
 
-
+# 巨潮资讯网
+from .cninfo import get_sh_latest, get_sz_latest, get_announcements

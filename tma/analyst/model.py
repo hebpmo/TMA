@@ -11,6 +11,8 @@ from tma.collector import get_price
 from tma.indicator import ShareDayIndicator
 
 
+# 爬楼梯模型
+# --------------------------------------------------------------------
 class ClimbStairs:
     """爬楼梯模型实现"""
 
@@ -71,7 +73,7 @@ class ClimbStairs:
         """获得当前价格在阶梯中的位置"""
         cur_price = self.cur_price
         price_gap = cur_price - min(self.price_seq)
-        pos = price_gap/self.stair_height
+        pos = price_gap / self.stair_height
         self.pos = pos
         return pos
 
@@ -99,8 +101,5 @@ class ClimbStairs:
         s['height'] = self.stair_height
         return s
 
-
-
-
-
-
+# 相似性计算，如 K线相似性等
+# --------------------------------------------------------------------
