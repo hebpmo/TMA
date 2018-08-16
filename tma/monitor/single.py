@@ -8,7 +8,6 @@ from tma.indicator import ShareDayIndicator
 from tma.utils import is_in_trade_time
 from tma import sms
 from tma.utils import debug_print
-from tma import logger
 from tma.monitor.market import get_market_status
 from tma.monitor.market import get_indices_status
 
@@ -55,6 +54,8 @@ def sm_limit(code, kind, threshold=10000, interval=1):
                 money = sdi.features['BUY_FIRST']
             elif kind == "dt":
                 money = sdi.features['SELL_FIRST']
+            else:
+                money = 0
 
             debug_info = "%s - %s - %s 万元" % (str(code), msg1, str(int(money / 10000)))
             debug_print(debug_info)
@@ -99,45 +100,31 @@ def get_shares_status(codes):
     return "".join(shares_status)
 
 
-def fix_inform(codes, interval=1800, key=None):
-    """交易时间段内，每隔一段时间播报一次市场状态和个股行情
+def fix_inform(codes):
+    """交易时间段内，市场状态和个股行情
 
     :param codes: list or str
         个股代码
-    :param interval: int
-        固定间隔时间，单位：秒
-    :param key: str
-        推送微信消息服务所需要的key
-    :return: None
+    :return: title, content
     """
-    if not is_in_trade_time():
-        return
     if isinstance(codes, str):
         codes = [codes]
 
-    start_info = "启动 - 固定间隔播报 | 参数配置：个股列表（%s）、时间间隔（%s）" \
-                 % (str(codes), str(interval))
-    logger.info(start_info)
+    status = []
+    # 构造播报信息 - 市场
+    market_status = get_market_status()
+    status.append(market_status)
 
-    while is_in_trade_time():
-        status = []
-        # 构造播报信息 - 市场
-        market_status = get_market_status()
-        status.append(market_status)
+    # 构造播报信息 - 指数
+    indices_status = get_indices_status()
+    status.append(indices_status)
 
-        # 构造播报信息 - 指数
-        indices_status = get_indices_status()
-        status.append(indices_status)
+    # 构造播报信息 - 个股
+    share_status = get_shares_status(codes)
+    status.append(share_status)
 
-        # 构造播报信息 - 个股
-        share_status = get_shares_status(codes)
-        status.append(share_status)
+    title = "市场状态播报 - %s" % datetime.now().__str__().split('.')[0]
+    content = ''.join(status)
 
-        title = "市场状态播报 - %s" % datetime.now().__str__().split('.')[0]
-        content = ''.join(status)
-        sms.server_chan_push(title, content, key=key)
-        time.sleep(interval)
+    return title, content
 
-    end_info = "结束 - 固定间隔播报 | 参数配置：个股列表（%s）、时间间隔（%s）" \
-               % (str(codes), str(interval))
-    logger.info(end_info)

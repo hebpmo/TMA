@@ -112,8 +112,11 @@ class HomePage(object):
         else:
             return None
 
-    def get_article_list(self):
+    def get_article_list(self, d=None):
         """获取首页的头条文章列表"""
+        if d is None:
+            d = [datetime.now().date().__str__()]
+
         html = requests.get(self.home_url, headers=get_header())
         bsobj = BeautifulSoup(html.content.decode('utf-8'), 'lxml')
 
@@ -144,7 +147,9 @@ class HomePage(object):
         df = pd.DataFrame(a_list, columns=['url', 'title', 'date'])
         df.drop_duplicates('url', inplace=True)
         res = [list(x) for x in list(df.values)]
-        return res
+        a_list = [a[0] for a in res if a[2] in d]
+        a_list = list(set(a_list))
+        return a_list
 
     def get_articles(self, d=None):
         """获取首页文章内容
@@ -153,13 +158,8 @@ class HomePage(object):
             限定获取文章的日期，默认是当日日期，可以指定多个离散的日期
         :return: list
         """
-        if d is None:
-            d = [datetime.now().date().__str__()]
-
         # 获取首页文章列表URL、按发布日期过滤、按URL去重
-        a_list = self.get_article_list()
-        a_list = [a[0] for a in a_list if a[2] in d]
-        a_list = list(set(a_list))
+        a_list = self.get_article_list(d)
 
         articles = []
         for a in a_list:

@@ -100,6 +100,3 @@ class ClimbStairs:
         s['nums'] = self.stair_nums
         s['height'] = self.stair_height
         return s
-
-# 相似性计算，如 K线相似性等
-# --------------------------------------------------------------------
