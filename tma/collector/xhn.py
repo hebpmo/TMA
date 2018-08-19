@@ -114,9 +114,6 @@ class HomePage(object):
 
     def get_article_list(self, d=None):
         """获取首页的头条文章列表"""
-        if d is None:
-            d = [datetime.now().date().__str__()]
-
         html = requests.get(self.home_url, headers=get_header())
         bsobj = BeautifulSoup(html.content.decode('utf-8'), 'lxml')
 
@@ -125,8 +122,8 @@ class HomePage(object):
             try:
                 url = a['href']
                 title = a.text.strip()
-                d = self._get_date_from_url(url)
-                a_list.append([url, title, d])
+                date_ = self._get_date_from_url(url)
+                a_list.append([url, title, date_])
             except:
                 if tma.DEBUG:
                     traceback.print_exc()
@@ -139,17 +136,23 @@ class HomePage(object):
                   and a[1] != ""
                   and a[1] != "视频MP4地址"
                   and "c_" in a[0]
-                  and 'photo' not in a[0]
-                  and 'video' not in a[0]
+                  and a[2] != ""
+                  # and 'photo' not in a[0]
+                  # and 'video' not in a[0]
                   ]
 
         # 根据url去重
         df = pd.DataFrame(a_list, columns=['url', 'title', 'date'])
         df.drop_duplicates('url', inplace=True)
         res = [list(x) for x in list(df.values)]
-        a_list = [a[0] for a in res if a[2] in d]
-        a_list = list(set(a_list))
-        return a_list
+
+        if d is None:
+            date_list = [datetime.now().date().__str__()]
+        else:
+            date_list = d
+        res = [a for a in res if a[2] in date_list]
+        res = sorted(res, key=lambda x: x[2], reverse=True)
+        return res
 
     def get_articles(self, d=None):
         """获取首页文章内容
@@ -159,7 +162,9 @@ class HomePage(object):
         :return: list
         """
         # 获取首页文章列表URL、按发布日期过滤、按URL去重
-        a_list = self.get_article_list(d)
+        res = self.get_article_list(d)
+        a_list = [a[0] for a in res]
+        a_list = list(set(a_list))
 
         articles = []
         for a in a_list:
