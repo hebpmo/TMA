@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 from zb.crawlers.utils import get_header
 import traceback
 import pandas as pd
+from tqdm import tqdm
 
 import tma
 
@@ -167,14 +168,13 @@ class HomePage(object):
         a_list = list(set(a_list))
 
         articles = []
-        for a in a_list:
+        for a in tqdm(a_list, ncols=100, desc="xhn.get_articles"):
             try:
                 article = get_article_detail(a)
                 articles.append(article)
             except:
                 if tma.DEBUG:
                     traceback.print_exc()
-                continue
         return articles
 
 
