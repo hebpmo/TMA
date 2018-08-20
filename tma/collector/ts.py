@@ -4,7 +4,7 @@
 Tushare数据接口封装
 ====================================================================
 """
-
+import requests
 import os
 import time
 from datetime import datetime
@@ -13,6 +13,44 @@ import pandas as pd
 import tushare as ts
 
 from tma import DATA_PATH
+
+TS_PRO_API = "http://api.tushare.pro"
+FILE_TOKEN = os.path.join(DATA_PATH, "tushare_pro.token")
+
+
+def set_token(token):
+    with open(FILE_TOKEN, 'w') as f:
+        f.write(token)
+
+
+def query_pro(api_name, fields='', **kwargs):
+    """通过 tushare pro api 获取数据
+
+    :param api_name: str
+    :param fields: list
+    :return: pd.DataFrame
+    """
+    if not os.path.exists(FILE_TOKEN):
+        raise EnvironmentError("%s 文件不存在，请先调用"
+                               "set_token()配置token" % FILE_TOKEN)
+    with open(FILE_TOKEN, 'r') as f:
+        token = f.readline()
+
+    req_params = {
+        'api_name': api_name,
+        'token': token,
+        'params': kwargs,
+        'fields': fields
+    }
+
+    result = requests.post(TS_PRO_API, json=req_params).json()
+    if result['code'] != 0:
+        raise Exception(result['msg'])
+    else:
+        data = result['data']
+        columns = data['fields']
+        items = data['items']
+        return pd.DataFrame(items, columns=columns)
 
 
 # --------------------------------------------------------------------
