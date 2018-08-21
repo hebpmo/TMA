@@ -10,16 +10,27 @@ collector.ths - 采集同花顺数据
 
 import requests
 from bs4 import BeautifulSoup
+from zb.crawlers.utils import get_header
+import re
 
 
-def get_market_level():
-    url = "http://q.10jqka.com.cn/"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (X11; U; Linux; en-US) AppleWebKit/527+ '
-                      '(KHTML, like Gecko, Safari/419.3) Arora/0.6'
-    }
-    html = requests.get(url, headers=headers)
-    html = BeautifulSoup(html.text, 'lxml')
-    rate = html.find('div', {'class': "hcharts-right"})
-    res = html.find('p', {'id': "hcharts-right"})
-    pass
+def zao_pan():
+    """获取同花顺早盘必读信息"""
+    url = "http://stock.10jqka.com.cn/zaopan/"
+    response = requests.get(url, headers=get_header())
+    html = BeautifulSoup(response.text, 'lxml')
+
+    # 名人名言
+    wisdom = html.find('div', {'class': "select-content"}).text.strip()
+
+    # 昨日收盘
+    yesterday = html.find('div', {'class': 'yestoday'}).text.strip()
+    yesterday = yesterday.replace("&nbsp&nbsp", "|")
+
+    # 今日关注
+    content = html.find('div', {'class': "content-main-fl fl"}).text.strip()
+    content = re.sub('[ \u3000]', "\n", content)
+
+    res = [wisdom, yesterday, content]
+
+    return "\n\n".join(res)
