@@ -12,16 +12,25 @@
 * 卸载 - `pip uninstall tma`
 * 更新 - `pip install --upgrade tma`
 
-### 监控（涨停/跌停）板（买一/卖一）挂单金额
+### 基于TFIDF的文档排序模型
 
 ```python
-import tma
-from tma.monitor import sm_limit
+from tma.collector import xhn
+from tma.analyst import rank
 
-# 设置SCKEY - 调用Server酱推送消息到微信
-tma.SCKEY = "XXXXXXXXXX"
+# 采集新华网今日首页头条文章
+hp = xhn.HomePage()
+articles = hp.get_articles()
+news = [x['title'] + '|' + x['source'] + "|" +
+        x['content'] for x in articles]
+news = [x.replace('\n', "") for x in news]
 
-sm_limit('600122', kind="zt", threshold=10000, interval=1)
+# 使用TFIDF排序模型
+ranker = rank.TfidfDocRank(news, N=20)
+# 查看前30条排序结果
+print(ranker.top30)
+# 查看前3条排序结果
+ranker.rank(top=3)
 ```
 
 ### A股交易日历
