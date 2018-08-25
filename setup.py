@@ -23,7 +23,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "tushare", "pandas", "requests", "zb", "retrying", "numpy",
-        "bs4"
+        "bs4", "jieba"
     ],
     python_requires=">=3",
     entry_points={}

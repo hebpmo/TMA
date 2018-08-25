@@ -7,3 +7,4 @@ tushare
 pandas
 requests
 zb
+jieba
