@@ -15,6 +15,16 @@ import re
 import pandas as pd
 
 
+def http_requests(url):
+    response = requests.get(url, headers=get_header())
+    if response.status_code == 200:
+        html = BeautifulSoup(response.text, 'lxml')
+        return html
+    else:
+        raise ValueError("返回状态码（%s）不是200，url采集失败"
+                         % str(response.status_code))
+
+
 def zao_pan():
     """获取同花顺早盘必读信息"""
     url = "http://stock.10jqka.com.cn/zaopan/"
@@ -155,3 +165,90 @@ def get_plate_shares(plate_code, kind='gn'):
         else:
             i += 1
     return pd.DataFrame(results, columns=col_names)
+
+
+# 个股F10
+# --------------------------------------------------------------------
+
+class ThsF10(object):
+    def __init__(self, code):
+        self.code = code
+        self.base_url = "http://basic.10jqka.com.cn/" \
+                        "{code}/".format(code=code)
+
+    def get_company_info(self):
+        """
+
+        页面案例：http://basic.10jqka.com.cn/600682/company.html
+
+        :return:
+        """
+        base_url = self.base_url
+        url = base_url + "company.html"
+        html = http_requests(url)
+
+        # 公司基本资料
+        table1 = html.find('table', {"class": "m_table"})
+        table1_info = [x for x in table1.text.strip().split('\n')
+                       if x != ""]
+        table2 = html.find('table', {"class": "m_table ggintro"})
+        table2_info = [re.sub("[\t\u3000 &nbsp▼▲]", '', x) for x
+                       in table2.text.strip().split('\n')
+                       if x != ""]
+        detail_info = table1_info + table2_info
+
+        # 董、监、高
+        m_tab_content = html.find_all('div', {'class': "m_tab_content"})
+        m_tab_content_infos = []
+        for table in m_tab_content:
+            info = [re.sub("[ ]", '', x) for x
+                    in table.text.strip().split('\n') if x != ""]
+            m_tab_content_infos.append(info)
+
+        # 发行相关
+        bd_pr = html.find('div', {'class': "bd pr"}).table
+        pr_info = [x for x in bd_pr.text.strip().split('\n')
+                   if x != '' and x != " "]
+        del pr_info[-2]
+        pr_info[-1] = pr_info[-1].replace("收起▲", "")
+
+        return {
+            "详细情况": detail_info,
+            "董监高": m_tab_content_infos,
+            "发行相关": pr_info
+        }
+
+    def get_concept_info(self):
+        base_url = self.base_url
+        url = base_url + "concept.html"
+        html = http_requests(url)
+
+        def _clear(data):
+            # 清理多余的数据
+            while 1:
+                try:
+                    i = data.index('展开')
+                except ValueError:
+                    break
+                del data[i - 1:i + 1]
+            return data
+
+        # 概念
+        gn_tables = html.find_all('table', {'class': "gnContent"})
+        gn_infos = []
+        for table in gn_tables:
+            gn = [x.strip() for x in table.text.strip().split("\n")
+                  if x.strip() != ""]
+            gn = _clear(gn)
+            gn_infos.append(gn)
+
+        # 题材要点
+        tcyd = html.find_all('div', {'class': "gntc"})[2]
+        tcyd_info = [x.strip(" \t \xa0>") for x in tcyd.text.strip().split("\n")
+                     if x.strip(" \t \xa0>") != ""]
+        tcyd_info = _clear(tcyd_info)
+
+        return {
+            "概念题材": gn_infos,
+            "题材要点": tcyd_info
+        }
