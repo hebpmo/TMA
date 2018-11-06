@@ -15,6 +15,7 @@ from tma.collector import bars
 
 class StockPool:
     """三级股票池对象"""
+
     def __init__(self, name, pool_path=None):
         self.name = name
         if pool_path is None:
@@ -128,7 +129,7 @@ class StockPool:
         :return: 股票池中对应code、level的所有数据
         :rtype: list
         """
-        shares_l = self.shares['level'+str(level)] 
+        shares_l = self.shares['level' + str(level)]
         shares = [x for x in shares_l if x['code'] == code]
         return shares
 
@@ -177,13 +178,13 @@ class StockPool:
         :param level: int, optional
 
         """
-        shares_l = self.shares['level'+str(level)]
+        shares_l = self.shares['level' + str(level)]
         codes_l = list(set([x['code'] for x in shares_l]))
-        batch_num = int(len(codes_l)/800) + 1
+        batch_num = int(len(codes_l) / 800) + 1
 
         res = []
         for i in range(batch_num):
-            codes = codes_l[i*800: (i+1)*800]
+            codes = codes_l[i * 800: (i + 1) * 800]
             res.append(bars(codes))
         codes_bar = pd.concat(res, ignore_index=True)
 
@@ -191,19 +192,13 @@ class StockPool:
         codes_bar['price'] = codes_bar['price'].astype(float)
         codes_bar['pre_close'] = codes_bar['pre_close'].astype(float)
         codes_bar['change'] = codes_bar['price'] - codes_bar['pre_close']
-        up_nums = len(codes_bar[codes_bar['change']>0])
-        down_nums = len(codes_bar[codes_bar['change']<=0])
+        up_nums = len(codes_bar[codes_bar['change'] > 0])
+        down_nums = len(codes_bar[codes_bar['change'] <= 0])
         total_nums = len(codes_bar)
 
         return {
             "up_nums": up_nums,
             "down_nums": down_nums,
             "total_nums": total_nums,
-            "up_rate": round(up_nums/total_nums, 4)
+            "up_rate": round(up_nums / total_nums, 4)
         }
-    
-
-
-
-
-
