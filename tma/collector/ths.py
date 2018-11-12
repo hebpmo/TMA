@@ -10,9 +10,18 @@ collector.ths - 采集同花顺数据
 
 import requests
 from bs4 import BeautifulSoup
+from requests_html import HTMLSession
 from zb.crawlers.utils import get_header
 import re
 import pandas as pd
+
+
+headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+           'Accept-Encoding': 'gzip, deflate',
+           'Accept-Language': 'en-US,en;q=0.5',
+           'Connection': 'keep-alive',
+           'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 '
+                         '(KHTML, like Gecko) Chrome/21.0.1180.71 Safari/537.1 LBBROWSER'}
 
 
 def http_requests(url):
@@ -64,7 +73,7 @@ def get_ths_plates():
     plates = []
     for kind in plate_kinds.keys():
         url = "http://q.10jqka.com.cn/%s/" % kind
-        response = requests.get(url, headers=get_header())
+        response = requests.get(url, headers=headers)
         html = BeautifulSoup(response.text, "lxml")
 
         results = html.find("div", {"class": "category boxShadow m_links"}).find_all("a")
@@ -89,6 +98,7 @@ def get_plate_fund_flow(kind):
         指明需要获取的资金流类型，可选值 ['hyzjl', 'gnzjl']
         hyzjl - 行业资金流
         gnzil - 概念资金流
+
     :return: pd.DataFrame
         ['序号', '行业', '行业指数', '涨跌幅', '流入资金(亿)', '流出资金(亿)',
         '净额(亿)', '公司家数', '领涨股', '涨跌幅', '当前价(元)']
@@ -101,22 +111,26 @@ def get_plate_fund_flow(kind):
 
     i = 1
     results = []
+    session = HTMLSession()
     while 1:
         url = url_template.format(page=i, kind=kind)
-        response = requests.get(url, headers=get_header())
-        html = BeautifulSoup(response.text, 'lxml')
+        response = session.get(url, headers=get_header())
+        response.html.render()
+        html = BeautifulSoup(response.html.text, 'lxml')
 
-        table = html.find('table', {'class': "m-table J-ajax-table"}).text.strip()
-        cells = table.split("\n")
-        col_nums = 13
+        # table = html.find('table', {'class': "m-table J-ajax-table"}).text.strip()
+        table = html.text.strip()
+        cells = table.split("\n")[:-2]
+        total_pages = int(table.split("\n")[-2].split("/")[1])
+
+        col_nums = 11
         row_nums = int(len(cells) / col_nums)
         col_names = cells[0: 11]
         for x in range(1, row_nums):
-            results.append(cells[x * col_nums + 2: (x + 1) * col_nums])
+            results.append(cells[x * col_nums: (x + 1) * col_nums])
 
-        # 判断是否是尾页
-        is_last_page = "尾页" not in html.find('div', {'class': "m-page J-ajax-page"}).text
-        if is_last_page:
+        # 尾页退出
+        if i >= total_pages:
             break
         else:
             i += 1
@@ -145,22 +159,27 @@ def get_plate_shares(plate_code, kind='gn'):
 
     i = 1
     results = []
+    session = HTMLSession()
     while 1:
         url = url_template.format(kind=kind, page=i, code=plate_code)
-        response = requests.get(url, headers=get_header())
-        html = BeautifulSoup(response.text, 'lxml')
+        response = session.get(url, headers=get_header())
+        response.html.render()
+        html = BeautifulSoup(response.html.text, 'lxml')
 
-        table = html.find('table', {'class': "m-table m-pager-table"}).text.strip()
-        cells = table.split("\n")
-        col_nums = 17
+        # table = html.find('table', {'class': "m-table m-pager-table"}).text.strip()
+        table = html.text.strip()
+        cells = table.split("\n")[:-1]
+        total_pages = int(table.split("\n")[-1].split("/")[1])
+        del cells[14]
+
+        col_nums = 14
         row_nums = int(len(cells) / col_nums)
         col_names = [x.strip() for x in cells[0: 14]]
-        for x in range(1, row_nums + 1):
+        for x in range(1, row_nums):
             results.append(cells[x * col_nums + 2: (x + 1) * col_nums - 1])
 
-        # 判断是否是尾页
-        is_last_page = "尾页" not in html.find('div', {'class': "m-pager"}).text
-        if is_last_page:
+        # 尾页退出
+        if i > total_pages:
             break
         else:
             i += 1
